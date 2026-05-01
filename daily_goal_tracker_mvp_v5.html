@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-sans, -apple-system, sans-serif);
+    background: var(--color-background-tertiary);
+    color: var(--color-text-primary);
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+  .float-header {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--color-background-primary);
+    padding: 12px 16px;
+  }
+  .header-inner {
+    display: flex; justify-content: space-between; align-items: center;
+    max-width: 1100px; margin: 0 auto;
+  }
+  .btn-today {
+    font-size: 13px; font-weight: 500; padding: 7px 14px;
+    border-radius: 4px; border: 0.5px solid #d0d0d0;
+    background: var(--color-background-primary); color: var(--color-text-primary); cursor: pointer;
+  }
+  .btn-today:hover { background: var(--color-background-secondary); }
+  .header-right { display: flex; gap: 8px; }
+  .icon-btn {
+    width: 34px; height: 34px; border-radius: 4px;
+    border: 0.5px solid #d0d0d0; background: var(--color-background-primary);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 15px; color: var(--color-text-secondary);
+  }
+  .icon-btn:hover { background: var(--color-background-secondary); }
+  .week-nav {
+    display: flex; align-items: center; gap: 8px;
+    padding: 14px 16px 8px; max-width: 1100px; margin: 0 auto;
+  }
+  .week-label {
+    font-size: 11px; color: var(--color-text-tertiary);
+    text-transform: uppercase; letter-spacing: 0.08em; flex: 1;
+  }
+  .nav-btn {
+    width: 26px; height: 26px; border-radius: 4px;
+    border: 0.5px solid #d0d0d0; background: var(--color-background-primary);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: var(--color-text-secondary); font-size: 13px; line-height: 1;
+  }
+  .nav-btn:hover { background: var(--color-background-secondary); }
+  .scroll-container {
+    display: flex; flex-direction: column; gap: 12px;
+    padding: 0 16px 16px; max-width: 1100px; margin: 0 auto;
+  }
+  .day-card {
+    background: var(--color-background-primary);
+    border-radius: 4px; border: 0.5px solid #f3f3f3; overflow: hidden;
+  }
+  .day-card.is-today { border: 1px solid #000; }
+  .day-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 14px 10px; border-bottom: 0.5px solid #f3f3f3;
+  }
+  .day-date { font-size: 13px; font-weight: 500; }
+  .today-badge {
+    font-size: 10px; font-weight: 500; padding: 3px 8px;
+    border-radius: 4px;
+    background: #000; color: #fff;
+  }
+  .completion-count { font-size: 11px; color: var(--color-text-tertiary); }
+  .goals-section { padding: 10px 14px; border-bottom: 0.5px solid #f3f3f3; }
+  .goal-item { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; }
+  .goal-item + .goal-item { border-top: 0.5px solid #f3f3f3; }
+  .goal-num { font-size: 11px; color: var(--color-text-tertiary); min-width: 14px; margin-top: 3px; }
+  .custom-check {
+    width: 18px; height: 18px; min-width: 18px; border-radius: 50%;
+    border: 1.5px solid #aaa; cursor: pointer; display: flex; align-items: center;
+    justify-content: center; margin-top: 1px; background: transparent;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .custom-check:hover { border-color: #666; }
+  .custom-check.checked { background: #2a9d5c; border-color: #2a9d5c; }
+  .custom-check.checked::after {
+    content: ''; width: 5px; height: 9px;
+    border-right: 2px solid #fff; border-bottom: 2px solid #fff;
+    transform: rotate(45deg) translate(-1px, -1px);
+  }
+  .goal-input {
+    flex: 1; font-size: 14px; color: var(--color-text-primary); border: none;
+    background: transparent; outline: none;
+    font-family: var(--font-sans, -apple-system, sans-serif);
+    padding: 0; resize: none; line-height: 1.5;
+  }
+  .goal-input::placeholder { color: var(--color-text-tertiary); }
+  .goal-input.done { text-decoration: line-through; color: var(--color-text-tertiary); }
+  .reflection-section { padding: 10px 14px; }
+  .reflection-label { font-size: 11px; color: var(--color-text-tertiary); margin-bottom: 6px; }
+  .reflection-input {
+    width: 100%; font-size: 13px; color: var(--color-text-primary);
+    border: 0.5px solid #e0e0e0; border-radius: 4px;
+    background: var(--color-background-secondary); outline: none;
+    font-family: var(--font-sans, -apple-system, sans-serif);
+    padding: 8px 10px; resize: none; line-height: 1.5; min-height: 58px;
+  }
+  .reflection-input::placeholder { color: var(--color-text-tertiary); }
+  .reflection-input:focus { border-color: #bbb; }
+  .reflection-divider { height: 0.5px; background: #f3f3f3; margin: 8px 0; }
+
+  /* Modal */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.3); z-index: 200;
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-sheet {
+    background: #ffffff; border-radius: 4px;
+    width: 320px; padding: 18px; border: 0.5px solid #e0e0e0;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+  }
+  .cal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .cal-month-btn {
+    font-size: 14px; font-weight: 500; color: #222;
+    background: none; border: none; cursor: pointer;
+    display: flex; align-items: center; gap: 4px; padding: 2px 4px;
+    border-radius: 4px;
+  }
+  .cal-month-btn:hover { background: #f3f3f3; }
+  .cal-month-btn .arrow-icon { font-size: 10px; color: #888; }
+  .cal-nav-group { display: flex; align-items: center; gap: 4px; }
+  .cal-nav {
+    width: 26px; height: 26px; border-radius: 4px;
+    border: 0.5px solid #ddd; background: #f9f9f9;
+    cursor: pointer; font-size: 14px; color: #555;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .cal-nav:hover { background: #f0f0f0; }
+  .modal-close {
+    width: 26px; height: 26px; border-radius: 4px;
+    border: 0.5px solid #ddd; background: #f5f5f5;
+    cursor: pointer; font-size: 13px; color: #555;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .cal-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    gap: 2px; text-align: center;
+  }
+  .cal-day-label { font-size: 11px; color: #999; padding: 4px 0; }
+  .cal-cell {
+    font-size: 12px; padding: 6px 2px; border-radius: 4px;
+    cursor: pointer; color: #222;
+  }
+  .cal-cell:hover { background: #f3f3f3; }
+  .cal-cell.today-cell { background: #000; color: #fff; font-weight: 500; }
+  .cal-cell.empty { cursor: default; }
+  .cal-cell.has-data::after {
+    content: ''; display: block; width: 4px; height: 4px;
+    border-radius: 50%; background: #2a9d5c; margin: 2px auto 0;
+  }
+  .picker-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 4px 0;
+  }
+  .picker-cell {
+    font-size: 12px; padding: 8px 4px; border-radius: 4px;
+    cursor: pointer; color: #222; text-align: center;
+    border: 0.5px solid transparent;
+  }
+  .picker-cell:hover { background: #f3f3f3; }
+  .picker-cell.active { background: #000; color: #fff; font-weight: 500; }
+  .picker-header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;
+  }
+  .picker-title { font-size: 14px; font-weight: 500; color: #222; cursor: pointer; }
+
+  @media (min-width: 768px) {
+    .scroll-container {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px; padding: 0 24px 24px;
+    }
+    .week-nav { padding: 20px 24px 10px; }
+    .float-header { padding: 14px 24px; }
+    body { padding-bottom: 40px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="float-header">
+  <div class="header-inner">
+    <button class="btn-today" onclick="goToToday()">Today</button>
+    <div class="header-right">
+      <button class="icon-btn" onclick="openCalendar()">📅</button>
+      <button class="icon-btn">⚙️</button>
+    </div>
+  </div>
+</div>
+
+<div class="week-nav">
+  <button class="nav-btn" onclick="changeWeek(-1)">&#8249;</button>
+  <span class="week-label" id="week-label"></span>
+  <button class="nav-btn" onclick="changeWeek(1)">&#8250;</button>
+</div>
+
+<div class="scroll-container" id="cards-container"></div>
+
+<div class="modal-overlay" id="cal-modal" onclick="closeCalendarOutside(event)">
+  <div class="modal-sheet" id="modal-sheet">
+    <div id="cal-view">
+      <div class="cal-header">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button class="cal-nav" onclick="changeCalMonth(-1)">&#8249;</button>
+          <button class="cal-month-btn" onclick="showPicker('month')" id="cal-month-title">
+            <span></span><span class="arrow-icon">▾</span>
+          </button>
+          <button class="cal-nav" onclick="changeCalMonth(1)">&#8250;</button>
+        </div>
+        <button class="modal-close" onclick="closeCalendar()">✕</button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+    <div id="month-picker" style="display:none;">
+      <div class="picker-header">
+        <button class="cal-nav" onclick="changePickerYear(-1)">&#8249;</button>
+        <span class="picker-title" id="picker-year-label" onclick="showPicker('year')"></span>
+        <button class="cal-nav" onclick="changePickerYear(1)">&#8250;</button>
+      </div>
+      <div class="picker-grid" id="month-grid"></div>
+    </div>
+    <div id="year-picker" style="display:none;">
+      <div class="picker-header">
+        <button class="cal-nav" onclick="changePickerDecade(-1)">&#8249;</button>
+        <span class="picker-title" id="picker-decade-label"></span>
+        <button class="cal-nav" onclick="changePickerDecade(1)">&#8250;</button>
+      </div>
+      <div class="picker-grid" id="year-grid"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const today = new Date();
+const todayStr = today.toISOString().slice(0,10);
+let currentWeekStart = getWeekStart(today);
+let calDate = new Date(today);
+let pickerYear = today.getFullYear();
+let pickerDecadeStart = Math.floor(today.getFullYear() / 12) * 12;
+
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+function getWeekStart(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  d.setDate(d.getDate() - day + (day === 0 ? -6 : 1));
+  d.setHours(0,0,0,0);
+  return d;
+}
+function formatDate(date) { return date.toISOString().slice(0,10); }
+function formatDateDisplay(date) {
+  return `${DAYS[date.getDay()]}, ${MONTHS_SHORT[date.getMonth()]} ${date.getDate()}`;
+}
+function loadData(key) { try { return JSON.parse(localStorage.getItem(key)) || {}; } catch { return {}; } }
+function saveData(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+function getCompletionCount(dateStr) {
+  return (loadData(dateStr).checks || [false,false,false]).filter(Boolean).length;
+}
+
+function renderCard(date) {
+  const dateStr = formatDate(date);
+  const isToday = dateStr === todayStr;
+  const data = loadData(dateStr);
+  const goals = data.goals || ['','',''];
+  const checks = data.checks || [false,false,false];
+  const learned = data.learned || '';
+  const improve = data.improve || '';
+  const completed = checks.filter(Boolean).length;
+  const card = document.createElement('div');
+  card.className = 'day-card' + (isToday ? ' is-today' : '');
+  card.id = 'card-' + dateStr;
+  card.innerHTML = `
+    <div class="day-header">
+      <span class="day-date">${formatDateDisplay(date)}</span>
+      <div style="display:flex;align-items:center;gap:8px;">
+        ${isToday ? '<span class="today-badge">Today</span>' : ''}
+        <span class="completion-count" id="count-${dateStr}">${completed}/3</span>
+      </div>
+    </div>
+    <div class="goals-section">
+      ${[0,1,2].map(i => `
+        <div class="goal-item">
+          <span class="goal-num">${i+1}</span>
+          <div class="custom-check ${checks[i]?'checked':''}" id="check-${dateStr}-${i}" onclick="toggleCheck('${dateStr}',${i})"></div>
+          <textarea class="goal-input ${checks[i]?'done':''}" id="goal-${dateStr}-${i}" rows="1"
+            placeholder="오늘의 goal을 입력해주세요"
+            oninput="autoResize(this);saveGoal('${dateStr}',${i},this.value)"
+          >${goals[i]}</textarea>
+        </div>`).join('')}
+    </div>
+    <div class="reflection-section">
+      <div class="reflection-label">배운 점</div>
+      <textarea class="reflection-input" rows="2" placeholder="오늘 배운 것을 기록해보세요 (최대 3문장)"
+        oninput="saveReflection('${dateStr}','learned',this.value)">${learned}</textarea>
+      <div class="reflection-divider"></div>
+      <div class="reflection-label">개선된 점</div>
+      <textarea class="reflection-input" rows="2" placeholder="개선된 점이나 다음엔 어떻게 할지 기록해보세요 (최대 3문장)"
+        oninput="saveReflection('${dateStr}','improve',this.value)">${improve}</textarea>
+    </div>`;
+  return card;
+}
+
+function autoResize(el) { el.style.height='auto'; el.style.height=el.scrollHeight+'px'; }
+
+function toggleCheck(dateStr, idx) {
+  const data = loadData(dateStr);
+  if (!data.checks) data.checks = [false,false,false];
+  data.checks[idx] = !data.checks[idx];
+  saveData(dateStr, data);
+  document.getElementById(`check-${dateStr}-${idx}`).classList.toggle('checked', data.checks[idx]);
+  document.getElementById(`goal-${dateStr}-${idx}`).classList.toggle('done', data.checks[idx]);
+  document.getElementById(`count-${dateStr}`).textContent = `${data.checks.filter(Boolean).length}/3`;
+}
+
+function saveGoal(dateStr, idx, val) {
+  const data = loadData(dateStr);
+  if (!data.goals) data.goals = ['','',''];
+  data.goals[idx] = val;
+  saveData(dateStr, data);
+}
+
+function saveReflection(dateStr, field, val) {
+  const data = loadData(dateStr);
+  data[field] = val;
+  saveData(dateStr, data);
+}
+
+function scrollToToday() {
+  const el = document.getElementById('card-' + todayStr);
+  if (el) el.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function goToToday() {
+  currentWeekStart = getWeekStart(today);
+  renderWeek(currentWeekStart);
+  setTimeout(scrollToToday, 50);
+}
+
+function changeWeek(dir) {
+  const d = new Date(currentWeekStart);
+  d.setDate(d.getDate() + dir * 7);
+  currentWeekStart = d;
+  renderWeek(currentWeekStart);
+}
+
+function renderWeek(weekStart) {
+  const container = document.getElementById('cards-container');
+  container.innerHTML = '';
+  const end = new Date(weekStart);
+  end.setDate(end.getDate() + 6);
+  document.getElementById('week-label').textContent =
+    `${MONTHS_SHORT[weekStart.getMonth()]} ${weekStart.getDate()} – ${MONTHS_SHORT[end.getMonth()]} ${end.getDate()}, ${end.getFullYear()}`;
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(weekStart);
+    d.setDate(d.getDate() + i);
+    const card = renderCard(d);
+    container.appendChild(card);
+    card.querySelectorAll('textarea').forEach(el => autoResize(el));
+  }
+}
+
+function openCalendar() {
+  calDate = new Date(today);
+  showView('cal-view');
+  renderCalendar();
+  document.getElementById('cal-modal').classList.add('open');
+}
+function closeCalendar() { document.getElementById('cal-modal').classList.remove('open'); }
+function closeCalendarOutside(e) { if (e.target===document.getElementById('cal-modal')) closeCalendar(); }
+
+function showView(id) {
+  ['cal-view','month-picker','year-picker'].forEach(v => {
+    document.getElementById(v).style.display = v===id ? '' : 'none';
+  });
+}
+
+function changeCalMonth(dir) {
+  calDate.setMonth(calDate.getMonth() + dir);
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const titleEl = document.getElementById('cal-month-title');
+  titleEl.childNodes[0].textContent = `${MONTHS[calDate.getMonth()]} ${calDate.getFullYear()}`;
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+  ['Mo','Tu','We','Th','Fr','Sa','Su'].forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'cal-day-label';
+    el.textContent = d;
+    grid.appendChild(el);
+  });
+  const firstDay = new Date(calDate.getFullYear(), calDate.getMonth(), 1);
+  let startDow = firstDay.getDay();
+  startDow = startDow === 0 ? 6 : startDow - 1;
+  for (let i = 0; i < startDow; i++) {
+    const el = document.createElement('div');
+    el.className = 'cal-cell empty';
+    grid.appendChild(el);
+  }
+  const daysInMonth = new Date(calDate.getFullYear(), calDate.getMonth()+1, 0).getDate();
+  for (let d = 1; d <= daysInMonth; d++) {
+    const cellDate = new Date(calDate.getFullYear(), calDate.getMonth(), d);
+    const cellStr = formatDate(cellDate);
+    const el = document.createElement('div');
+    el.className = 'cal-cell';
+    if (cellStr === todayStr) el.classList.add('today-cell');
+    if (getCompletionCount(cellStr) > 0) el.classList.add('has-data');
+    el.textContent = d;
+    el.onclick = () => {
+      currentWeekStart = getWeekStart(cellDate);
+      renderWeek(currentWeekStart);
+      closeCalendar();
+      setTimeout(() => {
+        const t = document.getElementById('card-' + cellStr);
+        if (t) t.scrollIntoView({ behavior:'smooth', block:'start' });
+      }, 100);
+    };
+    grid.appendChild(el);
+  }
+}
+
+function showPicker(type) {
+  if (type === 'month') {
+    pickerYear = calDate.getFullYear();
+    renderMonthPicker();
+    showView('month-picker');
+  } else {
+    pickerDecadeStart = Math.floor(calDate.getFullYear() / 12) * 12;
+    renderYearPicker();
+    showView('year-picker');
+  }
+}
+
+function changePickerYear(dir) { pickerYear += dir; renderMonthPicker(); }
+
+function renderMonthPicker() {
+  document.getElementById('picker-year-label').textContent = pickerYear;
+  const grid = document.getElementById('month-grid');
+  grid.innerHTML = '';
+  MONTHS_SHORT.forEach((m, i) => {
+    const el = document.createElement('div');
+    el.className = 'picker-cell';
+    if (i === calDate.getMonth() && pickerYear === calDate.getFullYear()) el.classList.add('active');
+    el.textContent = m;
+    el.onclick = () => {
+      calDate.setFullYear(pickerYear);
+      calDate.setMonth(i);
+      renderCalendar();
+      showView('cal-view');
+    };
+    grid.appendChild(el);
+  });
+}
+
+function changePickerDecade(dir) { pickerDecadeStart += dir * 12; renderYearPicker(); }
+
+function renderYearPicker() {
+  document.getElementById('picker-decade-label').textContent =
+    `${pickerDecadeStart} – ${pickerDecadeStart + 11}`;
+  const grid = document.getElementById('year-grid');
+  grid.innerHTML = '';
+  for (let y = pickerDecadeStart; y < pickerDecadeStart + 12; y++) {
+    const el = document.createElement('div');
+    el.className = 'picker-cell';
+    if (y === calDate.getFullYear()) el.classList.add('active');
+    el.textContent = y;
+    el.onclick = () => {
+      pickerYear = y;
+      renderMonthPicker();
+      showView('month-picker');
+    };
+    grid.appendChild(el);
+  }
+}
+
+renderWeek(currentWeekStart);
+setTimeout(scrollToToday, 100);
+</script>
+</body>
+</html>
