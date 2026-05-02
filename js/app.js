@@ -15,7 +15,11 @@ const db = getFirestore(app);
 
 const saveTimers = {};
 async function saveToFirestore(dateStr, data) {
-  try { await setDoc(doc(db, 'days', dateStr), data); }
+  try {
+    // Firestore에 undefined 방지 - null은 허용
+    const clean = JSON.parse(JSON.stringify(data, (k, v) => v === undefined ? null : v));
+    await setDoc(doc(db, 'days', dateStr), clean);
+  }
   catch(e) { console.error('Firestore save error', e); }
 }
 function debouncedSave(dateStr, data) {
@@ -44,6 +48,7 @@ async function loadFromFirestore(dateStr) {
 function refreshCard(dateStr, data) {
   const goals = data.goals || ['','',''];
   const checks = data.checks || [false,false,false];
+  const goalTags = data.goalTags || [null,null,null];
   [0,1,2].forEach(i => {
     const goalEl = document.getElementById(`goal-${dateStr}-${i}`);
     const checkEl = document.getElementById(`check-${dateStr}-${i}`);
@@ -57,6 +62,13 @@ function refreshCard(dateStr, data) {
     if (checkEl) {
       checkEl.classList.toggle('checked', checks[i]);
       if (iconEl) iconEl.style.display = checks[i] ? 'block' : 'none';
+    }
+    const wrap = document.getElementById(`tag-wrap-${dateStr}-${i}`);
+    if (wrap) {
+      const tag = goalTags[i] ? getTagById(goalTags[i]) : null;
+      wrap.innerHTML = tag
+        ? `<span class="tag-chip" style="background:${tag.color}20;color:${tag.color};border-color:${tag.color}40" onclick="openTagPicker('${dateStr}',${i})">${tag.name}</span>`
+        : `<button class="tag-add-btn" onclick="openTagPicker('${dateStr}',${i})">#</button>`;
     }
   });
   const learnedEl = document.querySelector(`#card-${dateStr} .reflection-input:nth-of-type(1)`);
