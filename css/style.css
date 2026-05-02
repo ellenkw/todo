@@ -184,7 +184,7 @@ body {
   font-family: var(--font);
   padding: 10px 12px;
   resize: none; line-height: 1.55;
-  min-height: 62px;
+  overflow: hidden;
   transition: border-color 0.15s, color 0.1s;
 }
 .reflection-input.has-value { color: var(--text-primary); }

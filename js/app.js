@@ -151,11 +151,11 @@ function renderCard(date) {
     <div class="reflection-section">
       <div class="reflection-label">배운 점</div>
       <textarea class="reflection-input${learned?' has-value':''}" rows="2" placeholder="오늘 배운 것을 기록해보세요"
-        oninput="saveReflection('${dateStr}','learned',this.value);updateInputState(this)">${learned}</textarea>
+        oninput="autoResize(this);saveReflection('${dateStr}','learned',this.value);updateInputState(this)">${learned}</textarea>
       <div class="reflection-divider"></div>
       <div class="reflection-label">개선된 점</div>
       <textarea class="reflection-input${improve?' has-value':''}" rows="2" placeholder="개선된 점이나 다음엔 어떻게 할지 기록해보세요"
-        oninput="saveReflection('${dateStr}','improve',this.value);updateInputState(this)">${improve}</textarea>
+        oninput="autoResize(this);saveReflection('${dateStr}','improve',this.value);updateInputState(this)">${improve}</textarea>
     </div>`;
   return card;
 }
