@@ -3,146 +3,258 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --green: #93BB89;
+    --green-light: #EAF2E8;
+    --green-badge-text: #fff;
+    --text-primary: #1A1A1A;
+    --text-filled: #2D2D2D;
+    --text-secondary: #6B7280;
+    --text-placeholder: #B0B8C1;
+    --bg: #FFFFFF;
+    --bg-card: #FFFFFF;
+    --border-default: #EBEBEB;
+    --border-card: #E5E5E5;
+    --border-today: #93BB89;
+    --border-input: #E0E0E0;
+    --border-input-focus: #93BB89;
+    --radius-card: 16px;
+    --radius-checkbox: 6px;
+    --radius-badge: 999px;
+    --radius-input: 12px;
+    --font: 'Apple SD Gothic Neo', 'Noto Sans KR', -apple-system, sans-serif;
+    --font-mono: 'Roboto Mono', monospace;
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: var(--font-sans, -apple-system, sans-serif);
-    background: var(--color-background-tertiary);
-    color: var(--color-text-primary);
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text-primary);
     min-height: 100vh;
     padding-bottom: 80px;
   }
+
+  /* ── Header ── */
   .float-header {
     position: sticky; top: 0; z-index: 100;
-    background: var(--color-background-primary);
-    padding: 12px 16px;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border-default);
+    padding: 12px 20px;
   }
   .header-inner {
     display: flex; justify-content: space-between; align-items: center;
     max-width: 1100px; margin: 0 auto;
   }
   .btn-today {
-    font-size: 13px; font-weight: 500; padding: 7px 14px;
-    border-radius: 4px; border: 0.5px solid #d0d0d0;
-    background: var(--color-background-primary); color: var(--color-text-primary); cursor: pointer;
+    font-size: 13px; font-weight: 600;
+    padding: 6px 14px;
+    border-radius: var(--radius-badge);
+    border: none;
+    background: var(--green-light);
+    color: var(--green);
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    letter-spacing: -0.01em;
   }
-  .btn-today:hover { background: var(--color-background-secondary); }
+  .btn-today:hover {
+    background: #d9ead6;
+    transform: scale(1.03);
+  }
   .header-right { display: flex; gap: 8px; }
   .icon-btn {
-    width: 34px; height: 34px; border-radius: 4px;
-    border: 0.5px solid #d0d0d0; background: var(--color-background-primary);
+    width: 34px; height: 34px; border-radius: 10px;
+    border: 1px solid var(--border-default);
+    background: var(--bg-card);
     cursor: pointer; display: flex; align-items: center; justify-content: center;
-    font-size: 15px; color: var(--color-text-secondary);
+    font-size: 15px; color: var(--text-secondary);
+    transition: background 0.15s;
   }
-  .icon-btn:hover { background: var(--color-background-secondary); }
+  .icon-btn:hover { background: #F0F0F0; }
+
+  /* ── Week Nav ── */
   .week-nav {
-    display: flex; align-items: center; gap: 8px;
-    padding: 14px 16px 8px; max-width: 1100px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: center; gap: 24px;
+    padding: 16px 20px 10px; max-width: 1100px; margin: 0 auto;
   }
   .week-label {
-    font-size: 11px; color: var(--color-text-tertiary);
-    text-transform: uppercase; letter-spacing: 0.08em; flex: 1;
+    font-size: 18px; font-weight: 500;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    letter-spacing: -0.02em;
+    text-align: center;
   }
   .nav-btn {
-    width: 26px; height: 26px; border-radius: 4px;
-    border: 0.5px solid #d0d0d0; background: var(--color-background-primary);
+    width: 28px; height: 28px; border-radius: 8px;
+    border: 1px solid var(--border-default);
+    background: var(--bg-card);
     cursor: pointer; display: flex; align-items: center; justify-content: center;
-    color: var(--color-text-secondary); font-size: 13px; line-height: 1;
+    color: var(--text-secondary); font-size: 16px; line-height: 1;
+    transition: background 0.15s;
   }
-  .nav-btn:hover { background: var(--color-background-secondary); }
+  .nav-btn:hover { background: #F0F0F0; }
+
+  /* ── Cards ── */
   .scroll-container {
-    display: flex; flex-direction: column; gap: 12px;
-    padding: 0 16px 16px; max-width: 1100px; margin: 0 auto;
+    display: flex; flex-direction: column; gap: 24px;
+    padding: 0 20px 20px; max-width: 1100px; margin: 0 auto;
   }
   .day-card {
-    background: var(--color-background-primary);
-    border-radius: 4px; border: 0.5px solid #f3f3f3; overflow: hidden;
+    background: var(--bg-card);
+    border-radius: var(--radius-card);
+    border: 1.5px solid var(--border-card);
+    overflow: hidden;
+    transition: box-shadow 0.2s;
   }
-  .day-card.is-today { border: 1px solid #000; }
+  .day-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+  .day-card.is-today {
+    border-color: var(--border-today);
+    box-shadow: 0 0 0 3px rgba(147,187,137,0.15);
+  }
+
+  /* ── Card Header ── */
   .day-header {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 12px 14px 10px; border-bottom: 0.5px solid #f3f3f3;
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid var(--border-default);
   }
-  .day-date { font-size: 13px; font-weight: 500; }
+  .day-date {
+    font-size: 14px; font-weight: 500;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+  }
+  .header-right-group { display: flex; align-items: center; gap: 8px; }
   .today-badge {
-    font-size: 10px; font-weight: 500; padding: 3px 8px;
-    border-radius: 4px;
-    background: #000; color: #fff;
+    font-size: 11px; font-weight: 600;
+    padding: 4px 12px;
+    border-radius: var(--radius-badge);
+    background: var(--green);
+    color: #fff;
+    letter-spacing: -0.01em;
   }
-  .completion-count { font-size: 11px; color: var(--color-text-tertiary); }
-  .goals-section { padding: 10px 14px; border-bottom: 0.5px solid #f3f3f3; }
-  .goal-item { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; }
-  .goal-item + .goal-item { border-top: 0.5px solid #f3f3f3; }
-  .goal-num { font-size: 11px; color: var(--color-text-tertiary); min-width: 14px; margin-top: 3px; }
-  .custom-check {
-    width: 18px; height: 18px; min-width: 18px; border-radius: 50%;
-    border: 1.5px solid #aaa; cursor: pointer; display: flex; align-items: center;
-    justify-content: center; margin-top: 1px; background: transparent;
-    transition: background 0.15s, border-color 0.15s;
+  .completion-count {
+    font-size: 12px; font-weight: 500;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
   }
-  .custom-check:hover { border-color: #666; }
-  .custom-check.checked { background: #2a9d5c; border-color: #2a9d5c; }
-  .custom-check.checked::after {
-    content: ''; width: 5px; height: 9px;
-    border-right: 2px solid #fff; border-bottom: 2px solid #fff;
-    transform: rotate(45deg) translate(-1px, -1px);
+  .completion-count.completed {
+    color: var(--green);
+    font-weight: 600;
   }
-  .goal-input {
-    flex: 1; font-size: 14px; color: var(--color-text-primary); border: none;
-    background: transparent; outline: none;
-    font-family: var(--font-sans, -apple-system, sans-serif);
-    padding: 0; resize: none; line-height: 1.5;
-  }
-  .goal-input::placeholder { color: var(--color-text-tertiary); }
-  .goal-input.done { text-decoration: line-through; color: var(--color-text-tertiary); }
-  .reflection-section { padding: 10px 14px; }
-  .reflection-label { font-size: 11px; color: var(--color-text-tertiary); margin-bottom: 6px; }
-  .reflection-input {
-    width: 100%; font-size: 13px; color: var(--color-text-primary);
-    border: 0.5px solid #e0e0e0; border-radius: 4px;
-    background: var(--color-background-secondary); outline: none;
-    font-family: var(--font-sans, -apple-system, sans-serif);
-    padding: 8px 10px; resize: none; line-height: 1.5; min-height: 58px;
-  }
-  .reflection-input::placeholder { color: var(--color-text-tertiary); }
-  .reflection-input:focus { border-color: #bbb; }
-  .reflection-divider { height: 0.5px; background: #f3f3f3; margin: 8px 0; }
 
-  /* Modal */
+  /* ── Goals ── */
+  .goals-section { padding: 10px 16px; border-bottom: 1px solid var(--border-default); }
+  .goal-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 8px 0;
+  }
+  .goal-item + .goal-item { border-top: 1px solid var(--border-default); }
+
+  /* Checkbox */
+  .custom-check {
+    width: 20px; height: 20px; min-width: 20px;
+    border-radius: var(--radius-checkbox);
+    border: 1.5px solid #D1D5DB;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+    background: transparent;
+    transition: border-color 0.15s;
+    flex-shrink: 0;
+    overflow: visible;
+  }
+  .custom-check:hover { border-color: var(--green); }
+  .custom-check.checked {
+    border: none;
+    width: 20px; height: 20px;
+  }
+  .check-icon { display: none; line-height: 0; }
+  .custom-check.checked .check-icon { display: block; }
+
+  /* Goal input */
+  .goal-input {
+    flex: 1; font-size: 14px;
+    color: var(--text-placeholder);
+    border: none; background: transparent; outline: none;
+    font-family: var(--font);
+    padding: 0; resize: none; line-height: 1.55;
+    transition: color 0.1s;
+  }
+  .goal-input.has-value { color: var(--text-primary); font-weight: 500; }
+  .goal-input::placeholder { color: var(--text-placeholder); font-weight: 400; }
+  .goal-input.done {
+    text-decoration: line-through;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  /* ── Reflection ── */
+  .reflection-section { padding: 12px 16px 14px; }
+  .reflection-label {
+    font-size: 12px; font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 7px;
+    letter-spacing: -0.01em;
+  }
+  .reflection-input {
+    width: 100%; font-size: 13px;
+    color: var(--text-placeholder);
+    border: 1.5px solid var(--border-input);
+    border-radius: var(--radius-input);
+    background: #FAFAFA;
+    outline: none;
+    font-family: var(--font);
+    padding: 10px 12px;
+    resize: none; line-height: 1.55;
+    min-height: 62px;
+    transition: border-color 0.15s, color 0.1s;
+  }
+  .reflection-input.has-value { color: var(--text-primary); }
+  .reflection-input::placeholder { color: var(--text-placeholder); }
+  .reflection-input:focus {
+    border-color: var(--green);
+    background: #fff;
+  }
+  .reflection-divider { height: 10px; }
+
+  /* ── Modal ── */
   .modal-overlay {
     display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.3); z-index: 200;
+    background: rgba(0,0,0,0.25); z-index: 200;
     align-items: center; justify-content: center;
+    backdrop-filter: blur(2px);
   }
   .modal-overlay.open { display: flex; }
   .modal-sheet {
-    background: #ffffff; border-radius: 4px;
-    width: 320px; padding: 18px; border: 0.5px solid #e0e0e0;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    background: #fff; border-radius: 16px;
+    width: 320px; padding: 20px;
+    border: 1px solid var(--border-default);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
   }
   .cal-header {
     display: flex; align-items: center; justify-content: space-between;
     margin-bottom: 14px;
   }
   .cal-month-btn {
-    font-size: 14px; font-weight: 500; color: #222;
+    font-size: 14px; font-weight: 600; color: var(--text-primary);
     background: none; border: none; cursor: pointer;
-    display: flex; align-items: center; gap: 4px; padding: 2px 4px;
-    border-radius: 4px;
+    display: flex; align-items: center; gap: 4px; padding: 2px 6px;
+    border-radius: 6px;
   }
   .cal-month-btn:hover { background: #f3f3f3; }
   .cal-month-btn .arrow-icon { font-size: 10px; color: #888; }
   .cal-nav-group { display: flex; align-items: center; gap: 4px; }
   .cal-nav {
-    width: 26px; height: 26px; border-radius: 4px;
-    border: 0.5px solid #ddd; background: #f9f9f9;
+    width: 28px; height: 28px; border-radius: 8px;
+    border: 1px solid var(--border-default); background: #f9f9f9;
     cursor: pointer; font-size: 14px; color: #555;
     display: flex; align-items: center; justify-content: center;
   }
   .cal-nav:hover { background: #f0f0f0; }
   .modal-close {
-    width: 26px; height: 26px; border-radius: 4px;
-    border: 0.5px solid #ddd; background: #f5f5f5;
+    width: 28px; height: 28px; border-radius: 8px;
+    border: 1px solid var(--border-default); background: #f5f5f5;
     cursor: pointer; font-size: 13px; color: #555;
     display: flex; align-items: center; justify-content: center;
   }
@@ -150,39 +262,35 @@
     display: grid; grid-template-columns: repeat(7, 1fr);
     gap: 2px; text-align: center;
   }
-  .cal-day-label { font-size: 11px; color: #999; padding: 4px 0; }
+  .cal-day-label { font-size: 11px; color: #aaa; padding: 4px 0; font-weight: 500; }
   .cal-cell {
-    font-size: 12px; padding: 6px 2px; border-radius: 4px;
-    cursor: pointer; color: #222;
+    font-size: 12px; padding: 6px 2px; border-radius: 6px;
+    cursor: pointer; color: var(--text-primary);
   }
   .cal-cell:hover { background: #f3f3f3; }
-  .cal-cell.today-cell { background: #000; color: #fff; font-weight: 500; }
+  .cal-cell.today-cell { background: var(--green); color: #fff; font-weight: 600; }
   .cal-cell.empty { cursor: default; }
   .cal-cell.has-data::after {
     content: ''; display: block; width: 4px; height: 4px;
-    border-radius: 50%; background: #2a9d5c; margin: 2px auto 0;
+    border-radius: 50%; background: var(--green); margin: 2px auto 0;
   }
-  .picker-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 4px 0;
-  }
+  .picker-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 4px 0; }
   .picker-cell {
-    font-size: 12px; padding: 8px 4px; border-radius: 4px;
-    cursor: pointer; color: #222; text-align: center;
-    border: 0.5px solid transparent;
+    font-size: 12px; padding: 8px 4px; border-radius: 8px;
+    cursor: pointer; color: var(--text-primary); text-align: center;
+    border: 1px solid transparent;
   }
   .picker-cell:hover { background: #f3f3f3; }
-  .picker-cell.active { background: #000; color: #fff; font-weight: 500; }
-  .picker-header {
-    display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;
-  }
-  .picker-title { font-size: 14px; font-weight: 500; color: #222; cursor: pointer; }
+  .picker-cell.active { background: var(--green); color: #fff; font-weight: 600; }
+  .picker-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .picker-title { font-size: 14px; font-weight: 600; color: var(--text-primary); cursor: pointer; }
 
   @media (min-width: 768px) {
     .scroll-container {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 14px; padding: 0 24px 24px;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 24px; padding: 0 24px 24px;
     }
-    .week-nav { padding: 20px 24px 10px; }
+    .week-nav { padding: 20px 24px 12px; }
     .float-header { padding: 14px 24px; }
     body { padding-bottom: 40px; }
   }
@@ -242,9 +350,110 @@
   </div>
 </div>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCUaccqKI5TwoNG5YQ0Dd0DYIjqH62lcOI",
+  authDomain: "todo-454be.firebaseapp.com",
+  projectId: "todo-454be",
+  storageBucket: "todo-454be.firebasestorage.app",
+  messagingSenderId: "210182337293",
+  appId: "1:210182337293:web:5ce96ca03dc9c781237644"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Firestore save (debounced)
+const saveTimers = {};
+async function saveToFirestore(dateStr, data) {
+  try {
+    await setDoc(doc(db, 'days', dateStr), data);
+  } catch(e) { console.error('Firestore save error', e); }
+}
+function debouncedSave(dateStr, data) {
+  clearTimeout(saveTimers[dateStr]);
+  saveTimers[dateStr] = setTimeout(() => saveToFirestore(dateStr, data), 800);
+}
+
+// localStorage as cache
+function loadData(key) { try { return JSON.parse(localStorage.getItem(key)) || {}; } catch { return {}; } }
+function saveData(key, val) {
+  localStorage.setItem(key, JSON.stringify(val));
+  debouncedSave(key, val);
+}
+
+// Load from Firestore and refresh card
+async function loadFromFirestore(dateStr) {
+  try {
+    const snap = await getDoc(doc(db, 'days', dateStr));
+    if (snap.exists()) {
+      const data = snap.data();
+      localStorage.setItem(dateStr, JSON.stringify(data));
+      refreshCard(dateStr, data);
+    }
+  } catch(e) { console.error('Firestore load error', e); }
+}
+
+function refreshCard(dateStr, data) {
+  const goals = data.goals || ['','',''];
+  const checks = data.checks || [false,false,false];
+  [0,1,2].forEach(i => {
+    const goalEl = document.getElementById(`goal-${dateStr}-${i}`);
+    const checkEl = document.getElementById(`check-${dateStr}-${i}`);
+    const iconEl = checkEl?.querySelector('.check-icon');
+    if (goalEl) {
+      goalEl.value = goals[i];
+      goalEl.classList.toggle('has-value', !!goals[i]);
+      goalEl.classList.toggle('done', checks[i]);
+      autoResize(goalEl);
+    }
+    if (checkEl) {
+      checkEl.classList.toggle('checked', checks[i]);
+      if (iconEl) iconEl.style.display = checks[i] ? 'block' : 'none';
+    }
+  });
+  const learnedEl = document.querySelector(`#card-${dateStr} .reflection-input:nth-of-type(1)`);
+  const improveEl = document.querySelector(`#card-${dateStr} .reflection-input:nth-of-type(2)`);
+  if (learnedEl) { learnedEl.value = data.learned||''; learnedEl.classList.toggle('has-value', !!(data.learned)); autoResize(learnedEl); }
+  if (improveEl) { improveEl.value = data.improve||''; improveEl.classList.toggle('has-value', !!(data.improve)); autoResize(improveEl); }
+  const cnt = checks.filter(Boolean).length;
+  const countEl = document.getElementById(`count-${dateStr}`);
+  if (countEl) { countEl.textContent = cnt===3?'Completed!':`${cnt}/3`; countEl.classList.toggle('completed', cnt===3); }
+}
+
+// Make functions global
+window.toggleCheck = toggleCheck;
+window.saveGoal = saveGoal;
+window.saveReflection = saveReflection;
+window.autoResize = autoResize;
+window.updateInputState = updateInputState;
+window.goToToday = goToToday;
+window.changeWeek = changeWeek;
+window.openCalendar = openCalendar;
+window.closeCalendar = closeCalendar;
+window.closeCalendarOutside = closeCalendarOutside;
+window.changeCalMonth = changeCalMonth;
+window.showPicker = showPicker;
+window.changePickerYear = changePickerYear;
+window.changePickerDecade = changePickerDecade;
+
+const CHECK_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+  <rect x="0.75" y="0.75" width="18.5" height="18.5" rx="5.25" stroke="#93BB89" stroke-width="1.5"/>
+  <g transform="translate(0.5, 0.5)">
+    <path d="M7.40894 5.72401C7.85539 3.42533 11.1446 3.42533 11.5911 5.72401C11.7567 6.57664 12.4234 7.24334 13.276 7.40894C15.5747 7.85539 15.5747 11.1446 13.276 11.5911C12.4234 11.7567 11.7567 12.4234 11.5911 13.276C11.1446 15.5747 7.85539 15.5747 7.40894 13.276C7.24334 12.4234 6.57664 11.7567 5.72401 11.5911C3.42533 11.1446 3.42533 7.85539 5.72401 7.40894C6.57664 7.24334 7.24334 6.57664 7.40894 5.72401Z" fill="#93BB89"/>
+  </g>
+</svg>`;
+
 const today = new Date();
-const todayStr = today.toISOString().slice(0,10);
+function toLocalDateStr(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth()+1).padStart(2,'0');
+  const d = String(date.getDate()).padStart(2,'0');
+  return `${y}-${m}-${d}`;
+}
+const todayStr = toLocalDateStr(today);
 let currentWeekStart = getWeekStart(today);
 let calDate = new Date(today);
 let pickerYear = today.getFullYear();
@@ -261,7 +470,7 @@ function getWeekStart(date) {
   d.setHours(0,0,0,0);
   return d;
 }
-function formatDate(date) { return date.toISOString().slice(0,10); }
+function formatDate(date) { return toLocalDateStr(date); }
 function formatDateDisplay(date) {
   return `${DAYS[date.getDay()]}, ${MONTHS_SHORT[date.getMonth()]} ${date.getDate()}`;
 }
@@ -286,32 +495,41 @@ function renderCard(date) {
   card.innerHTML = `
     <div class="day-header">
       <span class="day-date">${formatDateDisplay(date)}</span>
-      <div style="display:flex;align-items:center;gap:8px;">
+      <div class="header-right-group">
         ${isToday ? '<span class="today-badge">Today</span>' : ''}
-        <span class="completion-count" id="count-${dateStr}">${completed}/3</span>
+        <span class="completion-count${completed===3?' completed':''}" id="count-${dateStr}">${completed===3?'Completed!':completed+'/3'}</span>
       </div>
     </div>
     <div class="goals-section">
       ${[0,1,2].map(i => `
         <div class="goal-item">
-          <span class="goal-num">${i+1}</span>
-          <div class="custom-check ${checks[i]?'checked':''}" id="check-${dateStr}-${i}" onclick="toggleCheck('${dateStr}',${i})"></div>
-          <textarea class="goal-input ${checks[i]?'done':''}" id="goal-${dateStr}-${i}" rows="1"
-            placeholder="오늘의 goal을 입력해주세요"
-            oninput="autoResize(this);saveGoal('${dateStr}',${i},this.value)"
+          <div class="custom-check ${checks[i]?'checked':''}" id="check-${dateStr}-${i}" onclick="toggleCheck('${dateStr}',${i})">
+            <span class="check-icon" style="${checks[i]?'display:block':'display:none'}">${CHECK_SVG}</span>
+          </div>
+          <textarea class="goal-input ${checks[i]?'done':''}${goals[i]?' has-value':''}" id="goal-${dateStr}-${i}" rows="1"
+            placeholder="목표를 입력해주세요"
+            oninput="autoResize(this);saveGoal('${dateStr}',${i},this.value);updateInputState(this)"
           >${goals[i]}</textarea>
         </div>`).join('')}
     </div>
     <div class="reflection-section">
       <div class="reflection-label">배운 점</div>
-      <textarea class="reflection-input" rows="2" placeholder="오늘 배운 것을 기록해보세요 (최대 3문장)"
-        oninput="saveReflection('${dateStr}','learned',this.value)">${learned}</textarea>
+      <textarea class="reflection-input${learned?' has-value':''}" rows="2" placeholder="오늘 배운 것을 기록해보세요"
+        oninput="saveReflection('${dateStr}','learned',this.value);updateInputState(this)">${learned}</textarea>
       <div class="reflection-divider"></div>
       <div class="reflection-label">개선된 점</div>
-      <textarea class="reflection-input" rows="2" placeholder="개선된 점이나 다음엔 어떻게 할지 기록해보세요 (최대 3문장)"
-        oninput="saveReflection('${dateStr}','improve',this.value)">${improve}</textarea>
+      <textarea class="reflection-input${improve?' has-value':''}" rows="2" placeholder="개선된 점이나 다음엔 어떻게 할지 기록해보세요"
+        oninput="saveReflection('${dateStr}','improve',this.value);updateInputState(this)">${improve}</textarea>
     </div>`;
   return card;
+}
+
+function updateInputState(el) {
+  if (el.value.trim()) {
+    el.classList.add('has-value');
+  } else {
+    el.classList.remove('has-value');
+  }
 }
 
 function autoResize(el) { el.style.height='auto'; el.style.height=el.scrollHeight+'px'; }
@@ -321,9 +539,18 @@ function toggleCheck(dateStr, idx) {
   if (!data.checks) data.checks = [false,false,false];
   data.checks[idx] = !data.checks[idx];
   saveData(dateStr, data);
-  document.getElementById(`check-${dateStr}-${idx}`).classList.toggle('checked', data.checks[idx]);
-  document.getElementById(`goal-${dateStr}-${idx}`).classList.toggle('done', data.checks[idx]);
-  document.getElementById(`count-${dateStr}`).textContent = `${data.checks.filter(Boolean).length}/3`;
+
+  const checkEl = document.getElementById(`check-${dateStr}-${idx}`);
+  const iconEl = checkEl.querySelector('.check-icon');
+  checkEl.classList.toggle('checked', data.checks[idx]);
+  iconEl.style.display = data.checks[idx] ? 'block' : 'none';
+
+  const goalEl = document.getElementById(`goal-${dateStr}-${idx}`);
+  goalEl.classList.toggle('done', data.checks[idx]);
+  const countEl = document.getElementById(`count-${dateStr}`);
+  const cnt = data.checks.filter(Boolean).length;
+  countEl.textContent = cnt === 3 ? 'Completed!' : `${cnt}/3`;
+  countEl.classList.toggle('completed', cnt === 3);
 }
 
 function saveGoal(dateStr, idx, val) {
@@ -370,6 +597,7 @@ function renderWeek(weekStart) {
     const card = renderCard(d);
     container.appendChild(card);
     card.querySelectorAll('textarea').forEach(el => autoResize(el));
+    loadFromFirestore(formatDate(d));
   }
 }
 
