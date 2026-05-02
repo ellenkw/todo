@@ -137,7 +137,13 @@ function renderCard(date) {
       </div>
     </div>
     <div class="goals-section">
-      ${[0,1,2].map(i => `
+      ${[0,1,2].map(i => {
+        const tagId = (data.goalTags || [null,null,null])[i];
+        const tag = tagId ? getTagById(tagId) : null;
+        const tagHtml = tag
+          ? `<span class="tag-chip" style="background:${tag.color}20;color:${tag.color};border-color:${tag.color}40" onclick="openTagPicker('${dateStr}',${i})">${tag.name}</span>`
+          : `<button class="tag-add-btn" onclick="openTagPicker('${dateStr}',${i})">#</button>`;
+        return `
         <div class="goal-item">
           <div class="custom-check ${checks[i]?'checked':''}" id="check-${dateStr}-${i}" onclick="toggleCheck('${dateStr}',${i})">
             <span class="check-icon" style="${checks[i]?'display:block':'display:none'}">${CHECK_SVG}</span>
@@ -146,7 +152,9 @@ function renderCard(date) {
             placeholder="목표를 입력해주세요"
             oninput="autoResize(this);saveGoal('${dateStr}',${i},this.value);updateInputState(this)"
           >${goals[i]}</textarea>
-        </div>`).join('')}
+          <div class="tag-btn-wrap" id="tag-wrap-${dateStr}-${i}">${tagHtml}</div>
+        </div>`;
+      }).join('')}
     </div>
     <div class="reflection-section">
       <div class="reflection-label">배운 점</div>
@@ -337,3 +345,132 @@ window.changePickerDecade = changePickerDecade;
 
 renderWeek(currentWeekStart);
 setTimeout(scrollToToday, 100);
+
+// ── Tag System ──
+const TAG_PALETTE = ['#E57373','#FF8A65','#FFB300','#81C784','#4FC3F7','#7986CB','#BA68C8','#F06292','#4DB6AC','#90A4AE'];
+
+function loadTags() { try { return JSON.parse(localStorage.getItem('__tags__')) || []; } catch { return []; } }
+function saveTags(tags) { localStorage.setItem('__tags__', JSON.stringify(tags)); }
+function getTagById(id) { return loadTags().find(t => t.id === id) || null; }
+
+function openSettings() {
+  renderSettingsModal();
+  document.getElementById('settings-modal').classList.add('open');
+}
+function closeSettings() { document.getElementById('settings-modal').classList.remove('open'); }
+
+function renderSettingsModal() {
+  const tags = loadTags();
+  const list = document.getElementById('tag-list');
+  list.innerHTML = tags.length === 0
+    ? '<p style="font-size:13px;color:#aaa;text-align:center;padding:12px 0;">태그가 없어요</p>'
+    : tags.map(t => `
+      <div class="tag-list-item">
+        <span class="tag-chip" style="background:${t.color}20;color:${t.color};border-color:${t.color}40">${t.name}</span>
+        <div style="display:flex;gap:6px;">
+          <button class="tag-action-btn" onclick="editTag('${t.id}')">수정</button>
+          <button class="tag-action-btn danger" onclick="deleteTag('${t.id}')">삭제</button>
+        </div>
+      </div>`).join('');
+}
+
+function openAddTag() {
+  document.getElementById('tag-form-title').textContent = '태그 추가';
+  document.getElementById('tag-name-input').value = '';
+  document.getElementById('tag-edit-id').value = '';
+  renderPalette(null);
+  document.getElementById('tag-form').style.display = '';
+}
+
+function editTag(id) {
+  const tag = getTagById(id);
+  if (!tag) return;
+  document.getElementById('tag-form-title').textContent = '태그 수정';
+  document.getElementById('tag-name-input').value = tag.name;
+  document.getElementById('tag-edit-id').value = id;
+  renderPalette(tag.color);
+  document.getElementById('tag-form').style.display = '';
+}
+
+function deleteTag(id) {
+  const tags = loadTags().filter(t => t.id !== id);
+  saveTags(tags);
+  renderSettingsModal();
+}
+
+function renderPalette(selected) {
+  const palette = document.getElementById('color-palette');
+  palette.innerHTML = TAG_PALETTE.map(c => `
+    <div class="color-swatch ${selected===c?'selected':''}" style="background:${c}" onclick="selectColor('${c}')"></div>
+  `).join('');
+}
+
+function selectColor(color) {
+  document.getElementById('selected-color').value = color;
+  renderPalette(color);
+}
+
+function saveTag() {
+  const name = document.getElementById('tag-name-input').value.trim();
+  const color = document.getElementById('selected-color').value;
+  const editId = document.getElementById('tag-edit-id').value;
+  if (!name || !color) { alert('이름과 색상을 모두 선택해주세요.'); return; }
+  const tags = loadTags();
+  if (editId) {
+    const idx = tags.findIndex(t => t.id === editId);
+    if (idx > -1) tags[idx] = { id: editId, name, color };
+  } else {
+    tags.push({ id: Date.now().toString(), name, color });
+  }
+  saveTags(tags);
+  document.getElementById('tag-form').style.display = 'none';
+  renderSettingsModal();
+}
+
+let _tagPickerTarget = null;
+function openTagPicker(dateStr, idx) {
+  _tagPickerTarget = { dateStr, idx };
+  const tags = loadTags();
+  const data = loadData(dateStr);
+  const currentTagId = (data.goalTags || [])[idx] || null;
+  const list = document.getElementById('tag-picker-list');
+  list.innerHTML = `
+    <div class="tag-picker-item ${!currentTagId?'selected':''}" onclick="applyTag(null)">
+      <span style="font-size:13px;color:#aaa;">없음</span>
+    </div>
+    ${tags.map(t => `
+      <div class="tag-picker-item ${currentTagId===t.id?'selected':''}" onclick="applyTag('${t.id}')">
+        <span class="tag-chip" style="background:${t.color}20;color:${t.color};border-color:${t.color}40">${t.name}</span>
+      </div>`).join('')}`;
+  document.getElementById('tag-picker-modal').classList.add('open');
+}
+
+function closeTagPicker() { document.getElementById('tag-picker-modal').classList.remove('open'); }
+
+function applyTag(tagId) {
+  if (!_tagPickerTarget) return;
+  const { dateStr, idx } = _tagPickerTarget;
+  const data = loadData(dateStr);
+  if (!data.goalTags) data.goalTags = [null, null, null];
+  data.goalTags[idx] = tagId;
+  saveData(dateStr, data);
+  const wrap = document.getElementById(`tag-wrap-${dateStr}-${idx}`);
+  if (wrap) {
+    const tag = tagId ? getTagById(tagId) : null;
+    wrap.innerHTML = tag
+      ? `<span class="tag-chip" style="background:${tag.color}20;color:${tag.color};border-color:${tag.color}40" onclick="openTagPicker('${dateStr}',${idx})">${tag.name}</span>`
+      : `<button class="tag-add-btn" onclick="openTagPicker('${dateStr}',${idx})">#</button>`;
+  }
+  closeTagPicker();
+}
+
+window.openSettings = openSettings;
+window.closeSettings = closeSettings;
+window.openAddTag = openAddTag;
+window.editTag = editTag;
+window.deleteTag = deleteTag;
+window.selectColor = selectColor;
+window.saveTag = saveTag;
+window.openTagPicker = openTagPicker;
+window.closeTagPicker = closeTagPicker;
+window.applyTag = applyTag;

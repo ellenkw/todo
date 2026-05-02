@@ -14,7 +14,7 @@
       <button class="btn-today" onclick="goToToday()">Today</button>
       <div class="header-right">
         <button class="icon-btn" onclick="openCalendar()">📅</button>
-        <button class="icon-btn">⚙️</button>
+        <button class="icon-btn" onclick="openSettings()">⚙️</button>
       </div>
     </div>
   </div>
@@ -62,6 +62,42 @@
         <div class="picker-grid" id="year-grid"></div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settings-modal" onclick="if(event.target===this)closeSettings()">
+    <div class="modal-sheet" style="width:340px;max-height:80vh;overflow-y:auto;">
+      <div class="cal-header">
+        <span style="font-size:14px;font-weight:600;">태그 관리</span>
+        <button class="modal-close" onclick="closeSettings()">&#x2715;</button>
+      </div>
+      <div id="tag-list"></div>
+      <button class="tag-action-btn add" onclick="openAddTag()" style="width:100%;margin-top:12px;">+ 태그 추가</button>
+      <div id="tag-form" style="display:none;margin-top:16px;border-top:1px solid #ebebeb;padding-top:16px;">
+        <p id="tag-form-title" style="font-size:13px;font-weight:600;margin-bottom:10px;"></p>
+        <input id="tag-name-input" type="text" placeholder="태그 이름" maxlength="12"
+          style="width:100%;font-size:13px;padding:8px 10px;border:1.5px solid #e0e0e0;border-radius:8px;outline:none;margin-bottom:12px;font-family:inherit;">
+        <input type="hidden" id="tag-edit-id">
+        <input type="hidden" id="selected-color">
+        <p style="font-size:12px;color:#6b7280;margin-bottom:8px;">색상 선택</p>
+        <div id="color-palette" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;"></div>
+        <div style="display:flex;gap:8px;">
+          <button class="tag-action-btn" onclick="document.getElementById('tag-form').style.display='none'" style="flex:1;">취소</button>
+          <button class="tag-action-btn add" onclick="saveTag()" style="flex:1;">저장</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tag Picker Modal -->
+  <div class="modal-overlay" id="tag-picker-modal" onclick="if(event.target===this)closeTagPicker()">
+    <div class="modal-sheet" style="width:280px;">
+      <div class="cal-header">
+        <span style="font-size:14px;font-weight:600;">태그 선택</span>
+        <button class="modal-close" onclick="closeTagPicker()">&#x2715;</button>
+      </div>
+      <div id="tag-picker-list"></div>
     </div>
   </div>
 

@@ -264,3 +264,83 @@ body {
   .float-header { padding: 14px 24px; }
   body { padding-bottom: 40px; }
 }
+
+/* ── Tag System ── */
+.tag-btn-wrap {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.tag-add-btn {
+  font-size: 11px;
+  font-weight: 600;
+  color: #B0B8C1;
+  background: none;
+  border: 1px dashed #D1D5DB;
+  border-radius: 6px;
+  padding: 2px 6px;
+  cursor: pointer;
+  line-height: 1.4;
+  transition: color 0.15s, border-color 0.15s;
+}
+.tag-add-btn:hover { color: var(--green); border-color: var(--green); }
+
+.tag-chip {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid;
+  cursor: pointer;
+  white-space: nowrap;
+  line-height: 1.6;
+}
+
+.tag-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #f3f3f3;
+}
+
+.tag-action-btn {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  background: #fafafa;
+  color: #555;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.tag-action-btn:hover { background: #f0f0f0; }
+.tag-action-btn.danger { color: #E57373; border-color: #FFCDD2; background: #fff5f5; }
+.tag-action-btn.danger:hover { background: #FFEBEE; }
+.tag-action-btn.add { background: var(--green-light); color: var(--green); border-color: transparent; font-weight: 600; }
+.tag-action-btn.add:hover { background: #d9ead6; }
+
+.color-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform 0.1s, border-color 0.1s;
+}
+.color-swatch:hover { transform: scale(1.15); }
+.color-swatch.selected { border-color: #1A1A1A; transform: scale(1.15); }
+
+.tag-picker-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 6px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.tag-picker-item:hover { background: #f5f5f5; }
+.tag-picker-item.selected { background: #f0f0f0; }
