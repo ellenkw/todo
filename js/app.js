@@ -343,14 +343,26 @@ window.showPicker = showPicker;
 window.changePickerYear = changePickerYear;
 window.changePickerDecade = changePickerDecade;
 
-renderWeek(currentWeekStart);
-setTimeout(scrollToToday, 100);
+
 
 // ── Tag System ──
 const TAG_PALETTE = ['#E57373','#FF8A65','#FFB300','#81C784','#4FC3F7','#7986CB','#BA68C8','#F06292','#4DB6AC','#90A4AE'];
 
 function loadTags() { try { return JSON.parse(localStorage.getItem('__tags__')) || []; } catch { return []; } }
-function saveTags(tags) { localStorage.setItem('__tags__', JSON.stringify(tags)); }
+async function saveTags(tags) {
+  localStorage.setItem('__tags__', JSON.stringify(tags));
+  try { await setDoc(doc(db, 'settings', 'tags'), { list: tags }); }
+  catch(e) { console.error('Tag save error', e); }
+}
+async function syncTagsFromFirestore() {
+  try {
+    const snap = await getDoc(doc(db, 'settings', 'tags'));
+    if (snap.exists()) {
+      const tags = snap.data().list || [];
+      localStorage.setItem('__tags__', JSON.stringify(tags));
+    }
+  } catch(e) { console.error('Tag sync error', e); }
+}
 function getTagById(id) { return loadTags().find(t => t.id === id) || null; }
 
 function openSettings() {
@@ -392,9 +404,9 @@ function editTag(id) {
   document.getElementById('tag-form').style.display = '';
 }
 
-function deleteTag(id) {
+async function deleteTag(id) {
   const tags = loadTags().filter(t => t.id !== id);
-  saveTags(tags);
+  await saveTags(tags);
   renderSettingsModal();
 }
 
@@ -410,7 +422,7 @@ function selectColor(color) {
   renderPalette(color);
 }
 
-function saveTag() {
+async function saveTag() {
   const name = document.getElementById('tag-name-input').value.trim();
   const color = document.getElementById('selected-color').value;
   const editId = document.getElementById('tag-edit-id').value;
@@ -422,7 +434,7 @@ function saveTag() {
   } else {
     tags.push({ id: Date.now().toString(), name, color });
   }
-  saveTags(tags);
+  await saveTags(tags);
   document.getElementById('tag-form').style.display = 'none';
   renderSettingsModal();
 }
@@ -474,3 +486,9 @@ window.saveTag = saveTag;
 window.openTagPicker = openTagPicker;
 window.closeTagPicker = closeTagPicker;
 window.applyTag = applyTag;
+
+// ── Init ──
+syncTagsFromFirestore().then(() => {
+  renderWeek(currentWeekStart);
+  setTimeout(scrollToToday, 100);
+});
