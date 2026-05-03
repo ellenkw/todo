@@ -362,17 +362,8 @@ body {
 .bottom-nav-inner {
   display: flex;
   width: 100%;
-  max-width: 100%;
+  padding: 0 24px;
   justify-content: space-evenly;
-}
-
-@media (min-width: 768px) {
-  .bottom-nav-inner {
-    max-width: 1100px;
-    justify-content: flex-start;
-    gap: 48px;
-    padding: 0 24px;
-  }
 }
 
 .bottom-nav-item {
