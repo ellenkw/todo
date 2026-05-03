@@ -145,27 +145,30 @@ function renderList() {
   }
   container.innerHTML = cats.map(cat => {
     const items = todos[cat.id] || [];
-    const itemsHtml = items.length === 0
-      ? '<div class="todo-empty">아직 할 일이 없어요</div>'
-      : items.map((item, idx) => {
-          const isOverdue = item.due && item.due < todayStr && !item.done;
-          return `<div class="todo-item">
-            <div class="todo-item-check ${item.done?'checked':''}" onclick="toggleTodo('${cat.id}',${idx})">
-              <span class="check-icon" style="${item.done?'display:block':'display:none'}">${CHECK_SVG}</span>
-            </div>
-            <div class="todo-item-text-wrap">
-              <div class="todo-item-text ${item.done?'done':''}" onclick="editTodoText(this,'${cat.id}',${idx})">${item.text}</div>
-              ${item.due?`<div class="todo-item-due ${isOverdue?'overdue':''}">${item.due} (마감일)</div>`:''}
-            </div>
-            <button class="todo-item-delete" onclick="deleteTodo('${cat.id}',${idx})">✕</button>
-          </div>`;
-        }).join('');
+    const itemsHtml = items.map((item, idx) => {
+      return `<div class="todo-item">
+        <div class="todo-item-check ${item.done?'checked':''}" onclick="toggleTodo('${cat.id}',${idx})">
+          <span class="check-icon" style="${item.done?'display:block':'display:none'}">${CHECK_SVG}</span>
+        </div>
+        <div class="todo-item-text-wrap">
+          <div class="todo-item-text ${item.done?'done':''}" onclick="editTodoText(this,'${cat.id}',${idx})">${item.text}</div>
+        </div>
+        <button class="todo-item-delete" onclick="deleteTodo('${cat.id}',${idx})">✕</button>
+      </div>`;
+    }).join('');
     return `<div class="todo-category">
       <div class="todo-cat-header">
         <span class="todo-cat-name" style="color:${cat.color}">${cat.name}</span>
-        <button class="todo-cat-add" onclick="openAddTodo('${cat.id}')">+</button>
+        <button class="todo-cat-add" onclick="addInlineItem('${cat.id}')">+</button>
       </div>
       ${itemsHtml}
+      <div class="todo-inline-input-wrap" id="inline-${cat.id}" style="display:none;">
+        <div class="todo-item" style="border-top:1px solid var(--border-default);">
+          <div style="width:20px;min-width:20px;"></div>
+          <input class="todo-item-input" id="inline-input-${cat.id}" type="text" placeholder="할 일 입력 후 Enter">
+        </div>
+      </div>
+      ${items.length === 0 && document.getElementById('inline-'+cat.id)?.style.display === 'none' ? '<div class="todo-empty">아직 할 일이 없어요</div>' : ''}
     </div>`;
   }).join('');
 }
@@ -208,23 +211,27 @@ window.deleteTodo = async (catId, idx) => {
   renderList(); renderCal();
 };
 
-window.openAddTodo = (catId) => {
-  _addTodoCatId = catId;
-  document.getElementById('todo-text-input').value = '';
-  document.getElementById('todo-due-input').value = '';
-  document.getElementById('add-todo-modal').classList.add('open');
-};
-window.closeAddTodo = () => document.getElementById('add-todo-modal').classList.remove('open');
-
-window.saveTodoItem = async () => {
-  const text = document.getElementById('todo-text-input').value.trim();
-  if (!text) return;
-  const due = document.getElementById('todo-due-input').value || null;
-  const todos = loadTodos(selectedDate);
-  if (!todos[_addTodoCatId]) todos[_addTodoCatId] = [];
-  todos[_addTodoCatId].push({ text, due, done: false });
-  await saveTodos(selectedDate, todos);
-  window.closeAddTodo(); renderList(); renderCal();
+window.addInlineItem = (catId) => {
+  const wrap = document.getElementById(`inline-${catId}`);
+  const input = document.getElementById(`inline-input-${catId}`);
+  if (!wrap || !input) return;
+  wrap.style.display = '';
+  input.value = '';
+  input.focus();
+  input.onkeydown = async (e) => {
+    if (e.key === 'Enter') {
+      const text = input.value.trim();
+      if (text) {
+        const todos = loadTodos(selectedDate);
+        if (!todos[catId]) todos[catId] = [];
+        todos[catId].push({ text, done: false });
+        await saveTodos(selectedDate, todos);
+      }
+      renderList(); renderCal();
+    }
+    if (e.key === 'Escape') { wrap.style.display = 'none'; }
+  };
+  input.onblur = () => { setTimeout(() => { wrap.style.display = 'none'; }, 150); };
 };
 
 window.changeTodoMonth = (dir) => {
