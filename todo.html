@@ -202,24 +202,33 @@
       } catch(e) { console.error(e); }
     }
 
-    // Todos
-    function loadTodos(ds) { return loadLocal(`__todos__${ds}`) || {}; }
+    // Todos - month-based storage
+    function monthKey(ds) { return ds.slice(0, 7); } // "2026-05"
+    function dayKey(ds) { return ds.slice(8, 10); }  // "01"
+
+    function loadMonthLocal(ym) { return loadLocal(`__todos_month__${ym}`) || {}; }
+    function saveMonthLocal(ym, data) { saveLocal(`__todos_month__${ym}`, data); }
+
+    function loadTodos(ds) {
+      const month = loadMonthLocal(monthKey(ds));
+      return month[dayKey(ds)] || {};
+    }
     async function saveTodos(ds, data) {
-      saveLocal(`__todos__${ds}`, data);
+      const ym = monthKey(ds), dk = dayKey(ds);
+      const month = loadMonthLocal(ym);
+      month[dk] = data;
+      saveMonthLocal(ym, month);
       try {
-        const clean = JSON.parse(JSON.stringify(data, (k,v) => v === undefined ? null : v));
-        await setDoc(doc(db, 'todos', ds), clean);
+        const clean = JSON.parse(JSON.stringify(month, (k,v) => v === undefined ? null : v));
+        await setDoc(doc(db, 'todos', ym), clean);
       } catch(e) { console.error(e); }
     }
     async function syncTodosForMonth(y, m) {
-      const days = new Date(y, m+1, 0).getDate();
-      for (let d = 1; d <= days; d++) {
-        const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-        try {
-          const snap = await getDoc(doc(db, 'todos', ds));
-          if (snap.exists()) saveLocal(`__todos__${ds}`, snap.data());
-        } catch(e) {}
-      }
+      const ym = `${y}-${String(m+1).padStart(2,'0')}`;
+      try {
+        const snap = await getDoc(doc(db, 'todos', ym));
+        if (snap.exists()) saveMonthLocal(ym, snap.data());
+      } catch(e) { console.error(e); }
     }
 
     // Helpers
