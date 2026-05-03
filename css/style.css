@@ -256,7 +256,13 @@ body {
 .picker-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
 .picker-title { font-size: 14px; font-weight: 600; color: var(--text-primary); cursor: pointer; }
 
-@media (min-width: 768px) {
+/* iOS date input fix */
+input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 42px;
+  line-height: 42px;
+}
   .scroll-container {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
     gap: 24px; padding: 0 24px 24px;
