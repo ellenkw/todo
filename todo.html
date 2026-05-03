@@ -52,8 +52,9 @@
     .todo-item-delete { width: 20px; height: 20px; border: none; background: none; cursor: pointer; color: #D1D5DB; font-size: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: color 0.15s; }
     .todo-item-delete:hover { color: #E57373; }
     .todo-empty { font-size: 13px; color: var(--text-placeholder); padding: 8px 0; border-top: 1px solid var(--border-default); }
-    .todo-modal-input { width: 100%; font-size: 14px; padding: 9px 12px; border: 1.5px solid var(--border-input); border-radius: var(--radius-input); outline: none; font-family: var(--font); margin-bottom: 10px; color: var(--text-primary); }
+    .todo-modal-input { width: 100%; font-size: 14px; padding: 9px 12px; border: 1.5px solid var(--border-input); border-radius: var(--radius-input); outline: none; font-family: var(--font); margin-bottom: 10px; color: var(--text-primary); background: #fff; -webkit-appearance: none; appearance: none; }
     .todo-modal-input:focus { border-color: var(--green); }
+    .todo-modal-input[type="date"] { height: 42px; line-height: 42px; padding: 0 12px; color: var(--text-secondary); }
     .todo-modal-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
 
     @media (min-width: 768px) {
