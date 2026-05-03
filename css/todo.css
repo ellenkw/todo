@@ -1,0 +1,51 @@
+.todo-cal-wrap { padding: 16px 20px 0; max-width: 1100px; margin: 0 auto; }
+.todo-cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.todo-cal-title { font-size: 22px; font-weight: 400; color: var(--text-primary); font-family: var(--font); }
+.todo-cal-title strong { font-weight: 700; }
+.todo-cal-navs { display: flex; gap: 8px; }
+.todo-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0; }
+.todo-cal-dow { text-align: center; font-size: 11px; font-weight: 500; color: var(--text-secondary); padding: 4px 0 8px; }
+.todo-cal-cell { display: flex; flex-direction: column; align-items: center; padding: 4px 2px 6px; cursor: pointer; border-radius: 12px; transition: background 0.1s; min-height: 50px; }
+.todo-cal-cell:hover { background: #f5f5f5; }
+.todo-cal-cell.empty { cursor: default; pointer-events: none; }
+.todo-cal-num { font-size: 13px; font-weight: 500; color: var(--text-primary); width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+.todo-cal-cell.is-today .todo-cal-num { background: var(--green); color: #fff; font-weight: 700; }
+.todo-cal-cell.is-selected:not(.is-today) .todo-cal-num { border: 2px solid var(--green); }
+.todo-cal-cell.all-done:not(.is-today) .todo-cal-num { background: var(--green-light); color: var(--green); }
+.todo-dot-wrap { display: flex; align-items: center; gap: 2px; margin-top: 3px; height: 8px; }
+.todo-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+.todo-dot.plus { font-size: 8px; font-weight: 700; color: var(--green); background: none; width: auto; height: auto; border-radius: 0; line-height: 1; }
+
+.todo-list-wrap { padding: 20px; max-width: 1100px; margin: 0 auto; }
+.todo-selected-date { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 16px; font-family: var(--font-mono); }
+.todo-category { margin-bottom: 20px; }
+.todo-cat-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.todo-cat-name { font-size: 14px; font-weight: 700; }
+.todo-cat-add { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border-default); background: var(--bg-card); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; color: var(--text-secondary); transition: background 0.15s; }
+.todo-cat-add:hover { background: #f0f0f0; }
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 12px 0; border-top: 1px solid var(--border-default); }
+.todo-item:last-child { border-bottom: 1px solid var(--border-default); }
+.todo-item-check { width: 20px; height: 20px; min-width: 20px; border-radius: var(--radius-checkbox); border: 1.5px solid #D1D5DB; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-top: 1px; background: transparent; transition: border-color 0.15s; flex-shrink: 0; overflow: visible; }
+.todo-item-check:hover { border-color: var(--green); }
+.todo-item-check.checked { border: none; }
+.todo-item-check .check-icon { display: none; line-height: 0; }
+.todo-item-check.checked .check-icon { display: block; }
+.todo-item-text-wrap { flex: 1; }
+.todo-item-text { font-size: 14px; font-weight: 500; color: var(--text-primary); line-height: 1.5; word-break: break-all; cursor: text; }
+.todo-item-text.done { text-decoration: line-through; color: var(--text-secondary); }
+.todo-item-input { font-size: 14px; font-weight: 500; color: var(--text-primary); line-height: 1.5; width: 100%; border: none; outline: none; background: transparent; font-family: var(--font); padding: 0; }
+.todo-item-due { font-size: 11px; color: var(--text-placeholder); margin-top: 2px; }
+.todo-item-due.overdue { color: #E57373; }
+.todo-item-delete { width: 20px; height: 20px; border: none; background: none; cursor: pointer; color: #D1D5DB; font-size: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: color 0.15s; }
+.todo-item-delete:hover { color: #E57373; }
+.todo-empty { font-size: 13px; color: var(--text-placeholder); padding: 8px 0; border-top: 1px solid var(--border-default); }
+
+.todo-modal-input { width: 100%; font-size: 14px; padding: 9px 12px; border: 1.5px solid var(--border-input); border-radius: var(--radius-input); outline: none; font-family: var(--font); margin-bottom: 10px; color: var(--text-primary); background: #fff; -webkit-appearance: none; appearance: none; }
+.todo-modal-input:focus { border-color: var(--green); }
+.todo-modal-input[type="date"] { height: 42px; line-height: 42px; padding: 0 12px; color: var(--text-secondary); }
+.todo-modal-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
+
+@media (min-width: 768px) {
+  .todo-cal-wrap { padding: 20px 24px 0; }
+  .todo-list-wrap { padding: 20px 24px; }
+}
