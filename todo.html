@@ -297,7 +297,8 @@
     // List
     function renderList() {
       const cats = loadCats(), todos = loadTodos(selectedDate);
-      const d = new Date(selectedDate);
+      const [sy, sm, sd] = selectedDate.split('-').map(Number);
+      const d = new Date(sy, sm - 1, sd);
       document.getElementById('todo-selected-date').textContent =
         `${DAYS_SHORT[d.getDay()]}, ${MONTHS_SHORT[d.getMonth()]} ${d.getDate()}`;
       const container = document.getElementById('todo-cat-list');
