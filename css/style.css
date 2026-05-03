@@ -267,7 +267,7 @@ body {
 
 /* ── Tag System ── */
 .todo-cat-add { width: 36px !important; height: 36px !important; }
-.todo-item { padding: 20px 0 !important; }
+.todo-item { padding: 16px 0 !important; }
 .tag-btn-wrap {
   display: flex;
   align-items: center;

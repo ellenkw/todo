@@ -23,7 +23,7 @@
 .todo-cat-name { font-size: 14px; font-weight: 700; }
 .todo-cat-add { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border-default); background: var(--bg-card); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; color: var(--text-secondary); transition: background 0.15s; }
 .todo-cat-add:hover { background: #f0f0f0; }
-.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 20px 0; border-top: 1px solid var(--border-default); }
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 16px 0; border-top: 1px solid var(--border-default); }
 .todo-item:last-child { border-bottom: 1px solid var(--border-default); }
 .todo-item-check { width: 20px; height: 20px; min-width: 20px; border-radius: var(--radius-checkbox); border: 1.5px solid #D1D5DB; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-top: 1px; background: transparent; transition: border-color 0.15s; flex-shrink: 0; overflow: visible; }
 .todo-item-check:hover { border-color: var(--green); }
