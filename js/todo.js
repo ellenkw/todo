@@ -218,10 +218,9 @@ window.addInlineItem = (catId) => {
   wrap.style.display = '';
   input.value = '';
   input.focus();
-  let saved = false;
   input.onkeydown = async (e) => {
     if (e.key === 'Enter') {
-      saved = true;
+      input.onkeydown = null;
       const text = input.value.trim();
       if (text) {
         const todos = loadTodos(selectedDate);
@@ -231,9 +230,11 @@ window.addInlineItem = (catId) => {
       }
       renderList(); renderCal();
     }
-    if (e.key === 'Escape') { saved = true; wrap.style.display = 'none'; }
+    if (e.key === 'Escape') {
+      input.onkeydown = null;
+      wrap.style.display = 'none';
+    }
   };
-  input.onblur = () => { if (!saved) setTimeout(() => { wrap.style.display = 'none'; }, 150); };
 };
 
 window.changeTodoMonth = (dir) => {
