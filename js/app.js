@@ -13,34 +13,50 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const saveTimers = {};
-async function saveToFirestore(dateStr, data) {
-  try {
-    // Firestore에 undefined 방지 - null은 허용
-    const clean = JSON.parse(JSON.stringify(data, (k, v) => v === undefined ? null : v));
-    await setDoc(doc(db, 'days', dateStr), clean);
-  }
-  catch(e) { console.error('Firestore save error', e); }
+// ── Storage ──
+function monthKey(ds) { return ds.slice(0, 7); } // "2026-05"
+function dayKey(ds) { return ds.slice(8, 10); }  // "03"
+
+function loadMonthLocal(ym) { try { return JSON.parse(localStorage.getItem(`__days_month__${ym}`)) || {}; } catch { return {}; } }
+function saveMonthLocal(ym, data) { localStorage.setItem(`__days_month__${ym}`, JSON.stringify(data)); }
+
+function loadData(dateStr) {
+  return loadMonthLocal(monthKey(dateStr))[dayKey(dateStr)] || {};
 }
-function debouncedSave(dateStr, data) {
-  clearTimeout(saveTimers[dateStr]);
-  saveTimers[dateStr] = setTimeout(() => saveToFirestore(dateStr, data), 800);
+function saveData(dateStr, val) {
+  const ym = monthKey(dateStr), dk = dayKey(dateStr);
+  const month = loadMonthLocal(ym);
+  month[dk] = val;
+  saveMonthLocal(ym, month);
+  debouncedSave(dateStr, val);
 }
 
-// ── Storage ──
-function loadData(key) { try { return JSON.parse(localStorage.getItem(key)) || {}; } catch { return {}; } }
-function saveData(key, val) {
-  localStorage.setItem(key, JSON.stringify(val));
-  debouncedSave(key, val);
+const saveTimers = {};
+async function saveToFirestore(dateStr) {
+  const ym = monthKey(dateStr);
+  const month = loadMonthLocal(ym);
+  try {
+    const clean = JSON.parse(JSON.stringify(month, (k,v) => v === undefined ? null : v));
+    await setDoc(doc(db, 'days', ym), clean);
+  } catch(e) { console.error('Firestore save error', e); }
+}
+function debouncedSave(dateStr) {
+  const ym = monthKey(dateStr);
+  clearTimeout(saveTimers[ym]);
+  saveTimers[ym] = setTimeout(() => saveToFirestore(dateStr), 800);
 }
 
 async function loadFromFirestore(dateStr) {
+  const ym = monthKey(dateStr);
   try {
-    const snap = await getDoc(doc(db, 'days', dateStr));
+    const snap = await getDoc(doc(db, 'days', ym));
     if (snap.exists()) {
-      const data = snap.data();
-      localStorage.setItem(dateStr, JSON.stringify(data));
-      refreshCard(dateStr, data);
+      saveMonthLocal(ym, snap.data());
+      // refresh all visible cards for this month
+      document.querySelectorAll('.day-card').forEach(card => {
+        const ds = card.id.replace('card-', '');
+        if (monthKey(ds) === ym) refreshCard(ds, loadData(ds));
+      });
     }
   } catch(e) { console.error('Firestore load error', e); }
 }
@@ -235,13 +251,20 @@ function renderWeek(weekStart) {
   end.setDate(end.getDate() + 6);
   document.getElementById('week-label').textContent =
     `${MONTHS_SHORT[weekStart.getMonth()]} ${weekStart.getDate()} – ${MONTHS_SHORT[end.getMonth()]} ${end.getDate()}, ${end.getFullYear()}`;
+
+  const fetchedMonths = new Set();
   for (let i = 0; i < 7; i++) {
     const d = new Date(weekStart);
     d.setDate(d.getDate() + i);
     const card = renderCard(d);
     container.appendChild(card);
     card.querySelectorAll('textarea').forEach(el => autoResize(el));
-    loadFromFirestore(formatDate(d));
+    const ds = formatDate(d);
+    const ym = monthKey(ds);
+    if (!fetchedMonths.has(ym)) {
+      fetchedMonths.add(ym);
+      loadFromFirestore(ds);
+    }
   }
 }
 
