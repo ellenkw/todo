@@ -17,7 +17,7 @@
 .todo-dot.plus { font-size: 8px; font-weight: 700; color: var(--green); background: none; width: auto; height: auto; border-radius: 0; line-height: 1; }
 
 .todo-list-wrap { padding: 20px; max-width: 1100px; margin: 0 auto; }
-.todo-selected-date { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 16px; font-family: var(--font-mono); }
+.todo-selected-date { font-size: 16px; font-weight: 600; color: var(--text-secondary); margin-bottom: 16px; font-family: var(--font-mono); }
 .todo-category { margin-bottom: 20px; }
 .todo-cat-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 .todo-cat-name { font-size: 14px; font-weight: 700; }
