@@ -153,23 +153,13 @@ function renderList() {
   container.innerHTML = cats.map(cat => {
     const items = todos[cat.id] || [];
     const itemsHtml = items.map((item, idx) => {
-      return `<div class="todo-item" draggable="true" data-cat="${cat.id}" data-idx="${idx}"
-        ondragstart="onDragStart(event)"
-        ondragover="onDragOver(event)"
-        ondrop="onDrop(event,'${cat.id}')"
-        ondragend="onDragEnd(event)"
-        ontouchstart="onTouchStart(event)"
-        ontouchmove="onTouchMove(event)"
-        ontouchend="onTouchEnd(event,'${cat.id}')">
-        <div class="drag-handle" ontouchstart="event.stopPropagation()" onmousedown="event.stopPropagation()">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="4" cy="3" r="1.2" fill="#D1D5DB"/><circle cx="10" cy="3" r="1.2" fill="#D1D5DB"/><circle cx="4" cy="7" r="1.2" fill="#D1D5DB"/><circle cx="10" cy="7" r="1.2" fill="#D1D5DB"/><circle cx="4" cy="11" r="1.2" fill="#D1D5DB"/><circle cx="10" cy="11" r="1.2" fill="#D1D5DB"/></svg>
-        </div>
+      return `<div class="todo-item">
         <div class="todo-item-check ${item.done?'checked':''}"
           style="${item.done?'border:none':'border:1.5px solid #D1D5DB'}"
           onmouseenter="if(!this.classList.contains('checked'))this.style.borderColor='${cat.color}'"
           onmouseleave="if(!this.classList.contains('checked'))this.style.borderColor='#D1D5DB'"
           onclick="toggleTodo('${cat.id}',${idx})">
-          <span class="check-icon" style="${item.done?'display:block':'display:none'}">${makeCheckSVG('${cat.color}')}</span>
+          <span class="check-icon" style="${item.done?'display:block':'display:none'}">${makeCheckSVG(cat.color)}</span>
         </div>
         <div class="todo-item-text-wrap">
           <div class="todo-item-text ${item.done?'done':''}" onclick="editTodoText(this,'${cat.id}',${idx})">${item.text}</div>
@@ -333,90 +323,6 @@ window.saveCat = async () => {
   await saveCats(cats);
   document.getElementById('cat-form').style.display = 'none';
   renderCatSettings(); renderList();
-};
-
-
-// ── Drag & Drop ──
-let dragSrcIdx = null;
-let touchSrcIdx = null;
-let touchCatId = null;
-let touchClone = null;
-let touchStartY = 0;
-
-window.onDragStart = (e) => {
-  dragSrcIdx = parseInt(e.currentTarget.dataset.idx);
-  e.currentTarget.style.opacity = '0.4';
-  e.dataTransfer.effectAllowed = 'move';
-};
-
-window.onDragOver = (e) => {
-  e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
-  e.currentTarget.style.background = '#f5f5f5';
-};
-
-window.onDrop = async (e, catId) => {
-  e.preventDefault();
-  const targetIdx = parseInt(e.currentTarget.dataset.idx);
-  e.currentTarget.style.background = '';
-  if (dragSrcIdx === null || dragSrcIdx === targetIdx) return;
-  const todos = loadTodos(selectedDate);
-  const items = todos[catId] || [];
-  const [moved] = items.splice(dragSrcIdx, 1);
-  items.splice(targetIdx, 0, moved);
-  todos[catId] = items;
-  await saveTodos(selectedDate, todos);
-  renderList();
-};
-
-window.onDragEnd = (e) => {
-  e.currentTarget.style.opacity = '';
-  e.currentTarget.style.background = '';
-  dragSrcIdx = null;
-};
-
-// Touch drag
-window.onTouchStart = (e) => {
-  const el = e.currentTarget;
-  touchSrcIdx = parseInt(el.dataset.idx);
-  touchCatId = el.dataset.cat;
-  touchStartY = e.touches[0].clientY;
-  touchClone = el.cloneNode(true);
-  touchClone.style.cssText = `position:fixed;z-index:9999;opacity:0.85;pointer-events:none;width:${el.offsetWidth}px;left:${el.getBoundingClientRect().left}px;top:${el.getBoundingClientRect().top}px;background:#fff;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.15);`;
-  document.body.appendChild(touchClone);
-  el.style.opacity = '0.3';
-};
-
-window.onTouchMove = (e) => {
-  if (!touchClone) return;
-  e.preventDefault();
-  const dy = e.touches[0].clientY - touchStartY;
-  touchClone.style.top = (parseFloat(touchClone.style.top) + dy) + 'px';
-  touchStartY = e.touches[0].clientY;
-};
-
-window.onTouchEnd = async (e, catId) => {
-  if (!touchClone) return;
-  const cloneRect = touchClone.getBoundingClientRect();
-  const cloneCenterY = cloneRect.top + cloneRect.height / 2;
-  touchClone.remove(); touchClone = null;
-  document.querySelectorAll('.todo-item[data-cat="' + catId + '"]').forEach(el => el.style.opacity = '');
-
-  // 어느 아이템 위에 드롭됐는지 찾기
-  let targetIdx = null;
-  document.querySelectorAll('.todo-item[data-cat="' + catId + '"]').forEach(el => {
-    const r = el.getBoundingClientRect();
-    if (cloneCenterY >= r.top && cloneCenterY <= r.bottom) targetIdx = parseInt(el.dataset.idx);
-  });
-
-  if (targetIdx === null || targetIdx === touchSrcIdx) return;
-  const todos = loadTodos(selectedDate);
-  const items = todos[catId] || [];
-  const [moved] = items.splice(touchSrcIdx, 1);
-  items.splice(targetIdx, 0, moved);
-  todos[catId] = items;
-  await saveTodos(selectedDate, todos);
-  renderList();
 };
 
 // ── Init ──
