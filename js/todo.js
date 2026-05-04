@@ -14,12 +14,14 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // ── Constants ──
-const CHECK_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-  <rect x="0.75" y="0.75" width="18.5" height="18.5" rx="5.25" stroke="#93BB89" stroke-width="1.5"/>
-  <g transform="translate(0.5, 0.5)">
-    <path d="M7.40894 5.72401C7.85539 3.42533 11.1446 3.42533 11.5911 5.72401C11.7567 6.57664 12.4234 7.24334 13.276 7.40894C15.5747 7.85539 15.5747 11.1446 13.276 11.5911C12.4234 11.7567 11.7567 12.4234 11.5911 13.276C11.1446 15.5747 7.85539 15.5747 7.40894 13.276C7.24334 12.4234 6.57664 11.7567 5.72401 11.5911C3.42533 11.1446 3.42533 7.85539 5.72401 7.40894C6.57664 7.24334 7.24334 6.57664 7.40894 5.72401Z" fill="#93BB89"/>
-  </g>
-</svg>`;
+function makeCheckSVG(color) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+    <rect x="0.75" y="0.75" width="18.5" height="18.5" rx="5.25" stroke="${color}" stroke-width="1.5"/>
+    <g transform="translate(0.5, 0.5)">
+      <path d="M7.40894 5.72401C7.85539 3.42533 11.1446 3.42533 11.5911 5.72401C11.7567 6.57664 12.4234 7.24334 13.276 7.40894C15.5747 7.85539 15.5747 11.1446 13.276 11.5911C12.4234 11.7567 11.7567 12.4234 11.5911 13.276C11.1446 15.5747 7.85539 15.5747 7.40894 13.276C7.24334 12.4234 6.57664 11.7567 5.72401 11.5911C3.42533 11.1446 3.42533 7.85539 5.72401 7.40894C6.57664 7.24334 7.24334 6.57664 7.40894 5.72401Z" fill="${color}"/>
+    </g>
+  </svg>`;
+}
 
 const CAT_PALETTE = ['#E57373','#FF8A65','#FFB300','#81C784','#4FC3F7','#7986CB','#BA68C8','#F06292','#4DB6AC','#90A4AE'];
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -91,6 +93,11 @@ function getTotal(ds) {
   cats.forEach(c => { n += (todos[c.id]||[]).length; });
   return n;
 }
+function getIncompletePerCat(ds) {
+  const cats = loadCats(), todos = loadTodos(ds), result = [];
+  cats.forEach(c => (todos[c.id]||[]).forEach(i => { if (!i.done) result.push(c.color); }));
+  return result;
+}
 
 // ── Calendar ──
 function renderCal() {
@@ -118,9 +125,9 @@ function renderCal() {
     if (allDone) cell.classList.add('all-done');
     let dotsHtml = '';
     if (total > 0) {
-      const dotCount = Math.min(incomplete, 3);
-      const dots = Array(dotCount).fill('<div class="todo-dot"></div>').join('');
-      const plus = incomplete > 3 ? '<div class="todo-dot plus">+</div>' : '';
+      const colors = getIncompletePerCat(ds);
+      const dots = colors.slice(0,3).map(c => `<div class="todo-dot" style="background:${c}"></div>`).join('');
+      const plus = colors.length > 3 ? `<div class="todo-dot plus" style="color:${colors[3]}">+</div>` : '';
       dotsHtml = `<div class="todo-dot-wrap">${dots}${plus}</div>`;
     }
     cell.innerHTML = `<div class="todo-cal-num">${d}</div>${dotsHtml}`;
@@ -147,8 +154,12 @@ function renderList() {
     const items = todos[cat.id] || [];
     const itemsHtml = items.map((item, idx) => {
       return `<div class="todo-item">
-        <div class="todo-item-check ${item.done?'checked':''}" onclick="toggleTodo('${cat.id}',${idx})">
-          <span class="check-icon" style="${item.done?'display:block':'display:none'}">${CHECK_SVG}</span>
+        <div class="todo-item-check ${item.done?'checked':''}"
+          style="${item.done?'border:none':'border:1.5px solid #D1D5DB'}"
+          onmouseenter="if(!this.classList.contains('checked'))this.style.borderColor='${cat.color}'"
+          onmouseleave="if(!this.classList.contains('checked'))this.style.borderColor='#D1D5DB'"
+          onclick="toggleTodo('${cat.id}',${idx})">
+          <span class="check-icon" style="${item.done?'display:block':'display:none'}">${makeCheckSVG('${cat.color}')}</span>
         </div>
         <div class="todo-item-text-wrap">
           <div class="todo-item-text ${item.done?'done':''}" onclick="editTodoText(this,'${cat.id}',${idx})">${item.text}</div>
