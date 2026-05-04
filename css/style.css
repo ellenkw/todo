@@ -175,7 +175,7 @@ body {
   letter-spacing: -0.01em;
 }
 .reflection-input {
-  width: 100%; font-size: 13px;
+  width: 100%; font-size: 14px;
   color: var(--text-placeholder);
   border: 1.5px solid var(--border-input);
   border-radius: var(--radius-input);
