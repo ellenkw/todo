@@ -139,6 +139,120 @@ function renderCal() {
 function selectDate(ds) { selectedDate = ds; renderCal(); renderList(); }
 
 // ── List ──
+let dragSrcCatId = null;
+let dragSrcIdx = null;
+
+function makeTodoItemEl(item, idx, cat) {
+  const el = document.createElement('div');
+  el.className = 'todo-item';
+  el.dataset.idx = idx;
+  el.dataset.cat = cat.id;
+  el.draggable = true;
+
+  // drag handle
+  const handle = document.createElement('div');
+  handle.className = 'drag-handle';
+  handle.innerHTML = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="4" cy="3" r="1.2" fill="#D1D5DB"/><circle cx="10" cy="3" r="1.2" fill="#D1D5DB"/><circle cx="4" cy="7" r="1.2" fill="#D1D5DB"/><circle cx="10" cy="7" r="1.2" fill="#D1D5DB"/><circle cx="4" cy="11" r="1.2" fill="#D1D5DB"/><circle cx="10" cy="11" r="1.2" fill="#D1D5DB"/></svg>`;
+
+  // checkbox
+  const check = document.createElement('div');
+  check.className = 'todo-item-check' + (item.done ? ' checked' : '');
+  check.style.cssText = item.done ? 'border:none' : 'border:1.5px solid #D1D5DB';
+  check.innerHTML = `<span class="check-icon" style="${item.done?'display:block':'display:none'}">${makeCheckSVG(cat.color)}</span>`;
+  check.addEventListener('mouseenter', () => { if (!check.classList.contains('checked')) check.style.borderColor = cat.color; });
+  check.addEventListener('mouseleave', () => { if (!check.classList.contains('checked')) check.style.borderColor = '#D1D5DB'; });
+  check.addEventListener('click', () => toggleTodo(cat.id, idx));
+
+  // text
+  const textWrap = document.createElement('div');
+  textWrap.className = 'todo-item-text-wrap';
+  const textEl = document.createElement('div');
+  textEl.className = 'todo-item-text' + (item.done ? ' done' : '');
+  textEl.textContent = item.text;
+  textEl.addEventListener('click', () => editTodoText(textEl, cat.id, idx));
+  textWrap.appendChild(textEl);
+
+  // delete
+  const del = document.createElement('button');
+  del.className = 'todo-item-delete';
+  del.textContent = '✕';
+  del.addEventListener('click', () => deleteTodo(cat.id, idx));
+
+  el.appendChild(handle);
+  el.appendChild(check);
+  el.appendChild(textWrap);
+  el.appendChild(del);
+
+  // Desktop drag events
+  el.addEventListener('dragstart', (e) => {
+    dragSrcCatId = cat.id;
+    dragSrcIdx = idx;
+    e.dataTransfer.effectAllowed = 'move';
+    setTimeout(() => el.style.opacity = '0.4', 0);
+  });
+  el.addEventListener('dragend', () => { el.style.opacity = ''; });
+  el.addEventListener('dragover', (e) => { e.preventDefault(); el.style.background = '#f5f5f5'; });
+  el.addEventListener('dragleave', () => { el.style.background = ''; });
+  el.addEventListener('drop', async (e) => {
+    e.preventDefault();
+    el.style.background = '';
+    if (dragSrcCatId !== cat.id || dragSrcIdx === null || dragSrcIdx === idx) return;
+    const todos = loadTodos(selectedDate);
+    const items = todos[cat.id] || [];
+    const [moved] = items.splice(dragSrcIdx, 1);
+    items.splice(idx, 0, moved);
+    todos[cat.id] = items;
+    await saveTodos(selectedDate, todos);
+    renderList();
+  });
+
+  // Touch drag
+  let touchStartY = 0, touchClone = null;
+  handle.addEventListener('touchstart', (e) => {
+    e.stopPropagation();
+    dragSrcCatId = cat.id;
+    dragSrcIdx = idx;
+    touchStartY = e.touches[0].clientY;
+    const rect = el.getBoundingClientRect();
+    touchClone = el.cloneNode(true);
+    touchClone.style.cssText = `position:fixed;z-index:9999;opacity:0.85;pointer-events:none;width:${rect.width}px;left:${rect.left}px;top:${rect.top}px;background:#fff;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.15);`;
+    document.body.appendChild(touchClone);
+    el.style.opacity = '0.3';
+  }, { passive: true });
+
+  handle.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    if (!touchClone) return;
+    const dy = e.touches[0].clientY - touchStartY;
+    touchClone.style.top = (parseFloat(touchClone.style.top) + dy) + 'px';
+    touchStartY = e.touches[0].clientY;
+  }, { passive: false });
+
+  handle.addEventListener('touchend', async (e) => {
+    if (!touchClone) return;
+    const cloneCenterY = parseFloat(touchClone.style.top) + touchClone.offsetHeight / 2;
+    touchClone.remove(); touchClone = null;
+    el.style.opacity = '';
+
+    let targetIdx = null;
+    document.querySelectorAll(`.todo-item[data-cat="${cat.id}"]`).forEach(itemEl => {
+      const r = itemEl.getBoundingClientRect();
+      if (cloneCenterY >= r.top && cloneCenterY <= r.bottom) targetIdx = parseInt(itemEl.dataset.idx);
+    });
+
+    if (targetIdx === null || targetIdx === dragSrcIdx) return;
+    const todos = loadTodos(selectedDate);
+    const items = todos[cat.id] || [];
+    const [moved] = items.splice(dragSrcIdx, 1);
+    items.splice(targetIdx, 0, moved);
+    todos[cat.id] = items;
+    await saveTodos(selectedDate, todos);
+    renderList();
+  });
+
+  return el;
+}
+
 function renderList() {
   const cats = loadCats(), todos = loadTodos(selectedDate);
   const [sy, sm, sd] = selectedDate.split('-').map(Number);
@@ -146,42 +260,51 @@ function renderList() {
   document.getElementById('todo-selected-date').textContent =
     `${DAYS_SHORT[d.getDay()]}, ${MONTHS_SHORT[d.getMonth()]} ${d.getDate()}`;
   const container = document.getElementById('todo-cat-list');
+  container.innerHTML = '';
+
   if (cats.length === 0) {
     container.innerHTML = '<p style="font-size:13px;color:#B0B8C1;text-align:center;padding:32px 0;">⚙️ 버튼으로 카테고리를 추가해보세요</p>';
     return;
   }
-  container.innerHTML = cats.map(cat => {
+
+  cats.forEach(cat => {
     const items = todos[cat.id] || [];
-    const itemsHtml = items.map((item, idx) => {
-      return `<div class="todo-item">
-        <div class="todo-item-check ${item.done?'checked':''}"
-          style="${item.done?'border:none':'border:1.5px solid #D1D5DB'}"
-          onmouseenter="if(!this.classList.contains('checked'))this.style.borderColor='${cat.color}'"
-          onmouseleave="if(!this.classList.contains('checked'))this.style.borderColor='#D1D5DB'"
-          onclick="toggleTodo('${cat.id}',${idx})">
-          <span class="check-icon" style="${item.done?'display:block':'display:none'}">${makeCheckSVG(cat.color)}</span>
-        </div>
-        <div class="todo-item-text-wrap">
-          <div class="todo-item-text ${item.done?'done':''}" onclick="editTodoText(this,'${cat.id}',${idx})">${item.text}</div>
-        </div>
-        <button class="todo-item-delete" onclick="deleteTodo('${cat.id}',${idx})">✕</button>
-      </div>`;
-    }).join('');
-    return `<div class="todo-category">
-      <div class="todo-cat-header">
-        <span class="todo-cat-name" style="color:${cat.color}">${cat.name}</span>
-        <button class="todo-cat-add" onclick="addInlineItem('${cat.id}')">+</button>
-      </div>
-      ${itemsHtml}
-      <div class="todo-inline-input-wrap" id="inline-${cat.id}" style="display:none;">
-        <div class="todo-item" style="border-top:1px solid var(--border-default);">
-          <div style="width:20px;min-width:20px;"></div>
-          <input class="todo-item-input" id="inline-input-${cat.id}" type="text" placeholder="할 일 입력 후 Enter">
-        </div>
-      </div>
-      ${items.length === 0 && document.getElementById('inline-'+cat.id)?.style.display === 'none' ? '<div class="todo-empty">아직 할 일이 없어요</div>' : ''}
-    </div>`;
-  }).join('');
+    const catEl = document.createElement('div');
+    catEl.className = 'todo-category';
+
+    // header
+    const header = document.createElement('div');
+    header.className = 'todo-cat-header';
+    header.innerHTML = `<span class="todo-cat-name" style="color:${cat.color}">${cat.name}</span>`;
+    const addBtn = document.createElement('button');
+    addBtn.className = 'todo-cat-add';
+    addBtn.textContent = '+';
+    addBtn.addEventListener('click', () => addInlineItem(cat.id));
+    header.appendChild(addBtn);
+    catEl.appendChild(header);
+
+    // items
+    if (items.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'todo-empty';
+      empty.textContent = '아직 할 일이 없어요';
+      catEl.appendChild(empty);
+    } else {
+      items.forEach((item, idx) => {
+        catEl.appendChild(makeTodoItemEl(item, idx, cat));
+      });
+    }
+
+    // inline input
+    const inlineWrap = document.createElement('div');
+    inlineWrap.className = 'todo-inline-input-wrap';
+    inlineWrap.id = `inline-${cat.id}`;
+    inlineWrap.style.display = 'none';
+    inlineWrap.innerHTML = `<div class="todo-item" style="border-top:1px solid var(--border-default);"><div style="width:20px;min-width:20px;"></div><input class="todo-item-input" id="inline-input-${cat.id}" type="text" placeholder="할 일 입력 후 Enter"></div>`;
+    catEl.appendChild(inlineWrap);
+
+    container.appendChild(catEl);
+  });
 }
 
 // ── Actions ──
