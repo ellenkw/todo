@@ -15,7 +15,7 @@
   --radius-badge: 999px;
   --radius-input: 12px;
   --font: 'Apple SD Gothic Neo', 'Noto Sans KR', -apple-system, sans-serif;
-  --font-mono: 'Roboto Mono', monospace;
+  --font-mono: 'Gaegu', cursive;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
