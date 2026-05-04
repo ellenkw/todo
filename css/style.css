@@ -15,7 +15,7 @@
   --radius-badge: 999px;
   --radius-input: 12px;
   --font: 'Apple SD Gothic Neo', 'Noto Sans KR', -apple-system, sans-serif;
-  --font-mono: 'Gaegu', cursive;
+  --font-mono: 'Roboto Mono', monospace;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -71,7 +71,7 @@ body {
   padding: 14px 20px; max-width: 100%; margin: 0 auto;
 }
 .week-label {
-  font-size: 18px; font-weight: 500;
+  font-size: 20px; font-weight: 500;
   color: var(--text-primary);
   font-family: var(--font-mono);
   letter-spacing: -0.02em;
@@ -112,7 +112,7 @@ body {
   border-bottom: 1px solid var(--border-default);
 }
 .day-date {
-  font-size: 14px; font-weight: 500;
+  font-size: 16px; font-weight: 500;
   color: var(--text-primary);
   font-family: var(--font-mono);
 }
@@ -126,7 +126,7 @@ body {
   letter-spacing: -0.01em;
 }
 .completion-count {
-  font-size: 12px; font-weight: 500;
+  font-size: 14px; font-weight: 500;
   color: var(--text-secondary);
   font-family: var(--font-mono);
 }
